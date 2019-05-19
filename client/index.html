@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	  <title>WebSockets with HTML5</title>
+	  <meta charset="UTF-8">
+	  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	  <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+	  <div id="page-wrapper">
+		  <h1>Example of WebSockets</h1>
+
+		  <div id="status">Conecting to the app…</div>
+
+		  <ul id="msgs"></ul>
+
+		  <form id="form-msg" action="#" method="post">
+			  <textarea id="msg" placeholder="Write your msg here!" required></textarea>
+			  <button type="submit">Send msg</button>
+			  <button type="button" id="close">Close connection</button>
+		  </form>
+	  </div>
+	  <script src="app.js"></script>
+  </body>
+</html>
