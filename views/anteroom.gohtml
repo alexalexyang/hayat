@@ -1,0 +1,37 @@
+{{define "yield" }}
+
+<form method="post">
+  <p>
+    <label>Issues</label>
+  </p>
+  <p>
+    <label>First name</label><br>
+    <input type="text" name="first_name">
+  </p>
+  <p>
+    <label>Last name</label><br>
+    <input type="text" name="last_name">
+  </p>
+    <p>
+    <label>Age</label><br>
+    <input type="text" name="age">
+  </p>
+    <p>
+    <label>Gender</label><br>
+    <input type="text" name="gender">
+  </p>
+  {{/* <p>
+    <label>Email</label><br>
+    <input type="email" name="email" required>
+  </p> */}}
+  <p>
+    <label>Issues</label><br>
+    <input type="textarea" name="issues" required>
+  </p>
+  <p>
+    <button>Submit</button>
+    <button type="reset">Reset form</button>
+  </p>
+</form>
+
+{{end}}
