@@ -19,8 +19,7 @@ func initRouter() *mux.Router {
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	router.HandleFunc("/anteroom", chat.AnteroomHandler)
 	router.HandleFunc("/chatclientws", chat.ChatClientWSHandler)
-	router.HandleFunc("/chatclient", chat.ChatClientHandler)
-	router.HandleFunc("/clientlistws", chat.ClientListWSHandler)
+	router.HandleFunc("/chatclient/{id:[\\w\\-\\=]+}", chat.ChatClientHandler)
 	router.HandleFunc("/clientlist", chat.ClientListHandler)
 	return router
 }
