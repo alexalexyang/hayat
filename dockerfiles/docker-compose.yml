@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  con1:
+    image: postgres:alpine
+    container_name: con1
+    env_file: .env
+    ports:
+      - 5000:5432
+    volumes:
+      - ./shared:/dbdump
+    networks:
+      - mynet
+
+networks:
+  mynet:
