@@ -1,13 +1,14 @@
 package chat
 
 import (
+	"database/sql"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"strconv"
 
-	"github.com/alexalexyang/hayat/serverconfig"
+	"github.com/alexalexyang/hayat/config"
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/websocket"
@@ -18,8 +19,6 @@ func check(err error) {
 		log.Fatal(err)
 	}
 }
-
-var ChatroomRegistry = make(map[string]ChatroomStruct)
 
 type AnteroomStruct struct {
 	username string
@@ -86,29 +85,41 @@ func AnteroomHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	unencodedValue := uuid.Must(uuid.NewV4()).String()
-	fmt.Println("CookieValue1:", unencodedValue)
-	encodedValue := encoder(unencodedValue)
+	// This is the unique ID for the client.
+	rawCookieValue := uuid.Must(uuid.NewV4()).String()
+	fmt.Println("CookieValue1:", rawCookieValue)
+	encodedValue := encoder(rawCookieValue)
 	cookieSetter(w, "hayatclient", encodedValue)
 
-	anteroomValues := AnteroomStruct{}
-	anteroomValues.username = r.FormValue("username")
-	anteroomValues.age, _ = strconv.Atoi(r.FormValue("age"))
-	anteroomValues.gender = r.FormValue("gender")
-	anteroomValues.issues = r.FormValue("issues")
-	anteroomValues.token = r.FormValue("token")
-	fmt.Println(anteroomValues)
+	username := r.FormValue("username")
+	age, _ := strconv.Atoi(r.FormValue("age"))
+	gender := r.FormValue("gender")
+	issues := r.FormValue("issues")
 
-	// chatroomID := uuid.Must(uuid.NewV4()).String()
-	unencodedRoom := uuid.Must(uuid.NewV4()).String()
-	fmt.Println("RoomValue1:", unencodedRoom)
-	encodedRoom := encoder(unencodedRoom)
-	cookieSetter(w, "clientroom", encodedRoom)
+	// Token is used to identify which customer the client goes to.
+	token := r.FormValue("token")
+
+	// chatroomID is used to list the room in the clientlist.
+	roomID := uuid.Must(uuid.NewV4()).String()
+	cookieSetter(w, "clientroom", roomID)
 
 	// Add anteroomValues to db.
+	db, err := sql.Open(config.Driver, config.DBconfig)
+	check(err)
+	defer db.Close()
+
+	statement := `INSERT INTO anteroom (usercookie, username, age, gender, issues)
+	VALUES ($1, $2, $3, $4, $5)`
+	_, err = db.Exec(statement, rawCookieValue, username, age, gender, issues)
+	check(err)
+
+	statement = `INSERT INTO rooms (roomid, token, usercookie)
+				VALUES ($1, $2, $3)`
+	_, err = db.Exec(statement, roomID, token, rawCookieValue)
+	check(err)
 
 	// http.Redirect(w, r, "http://localhost:3000/contact", http.StatusFound)
-	http.Redirect(w, r, serverconfig.Domain+serverconfig.Port+"/chatclient/"+encodedRoom, http.StatusSeeOther)
+	http.Redirect(w, r, config.Domain+config.Port+"/chatclient/"+roomID, http.StatusSeeOther)
 }
 
 func ChatClientHandler(w http.ResponseWriter, r *http.Request) {
@@ -123,7 +134,6 @@ func ChatRoomMaker(chatroomID string, ws *websocket.Conn) map[*websocket.Conn]bo
 	Chatroom.Clients = make(map[*websocket.Conn]bool)
 	Chatroom.Clients[ws] = true
 	clients := Chatroom.Clients
-	ChatroomRegistry[chatroomID] = Chatroom
 	return clients
 }
 
@@ -135,21 +145,14 @@ func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("CookieValue2:", cookieValue)
 
 	roomCookie, err := r.Cookie("clientroom")
-	encodedRoom := roomCookie.Value
-	check(err)
-	roomValue := decoder(encodedRoom)
-	fmt.Println("RoomValue2:", roomValue)
+	fmt.Println("RoomValue2:", roomCookie.Value)
 
 	ws, err := upgrader.Upgrade(w, r, nil)
 	check(err)
 	defer ws.Close()
 
 	// Create a chatroom.
-	clients := ChatRoomMaker(roomValue, ws)
-
-	for k, v := range ChatroomRegistry {
-		fmt.Println(k, v)
-	}
+	clients := ChatRoomMaker(roomCookie.Value, ws)
 
 	// Use cookie to find the user and enter into chatBroker.
 

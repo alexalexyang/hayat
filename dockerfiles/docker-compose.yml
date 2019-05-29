@@ -1,12 +1,12 @@
 version: "3"
 
 services:
-  con1:
+  hayatdb:
     image: postgres:alpine
-    container_name: con1
+    container_name: hayatdb
     env_file: .env
     ports:
-      - 5000:5432
+      - 5431:5432
     volumes:
       - ./shared:/dbdump
     networks:
