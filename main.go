@@ -12,6 +12,7 @@ import (
 
 	"github.com/alexalexyang/hayat/chat"
 	"github.com/alexalexyang/hayat/config"
+	"github.com/alexalexyang/hayat/login"
 	"github.com/alexalexyang/hayat/models"
 	"github.com/gorilla/mux"
 	"github.com/lib/pq"
@@ -31,6 +32,8 @@ func initRouter() *mux.Router {
 	router.HandleFunc("/chatclientws", chat.ChatClientWSHandler)
 	router.HandleFunc("/chatclient/{id:[\\w\\-]+}", chat.ChatClientHandler)
 	router.HandleFunc("/clientlist", chat.ClientListHandler)
+
+	router.HandleFunc("/login", login.loginHandler)
 	return router
 }
 

@@ -20,6 +20,9 @@ func check(err error) {
 	}
 }
 
+// Rooms mapped by room ID to user websockets.
+var roomsRegistry = make(map[string]ChatroomStruct)
+
 type AnteroomStruct struct {
 	username string
 	age      int
@@ -108,12 +111,12 @@ func AnteroomHandler(w http.ResponseWriter, r *http.Request) {
 	check(err)
 	defer db.Close()
 
-	statement := `INSERT INTO anteroom (usercookie, username, age, gender, issues)
+	statement := `INSERT INTO anteroom (sessioncookie, username, age, gender, issues)
 	VALUES ($1, $2, $3, $4, $5)`
 	_, err = db.Exec(statement, rawCookieValue, username, age, gender, issues)
 	check(err)
 
-	statement = `INSERT INTO rooms (roomid, token, usercookie)
+	statement = `INSERT INTO rooms (roomid, token, sessioncookie)
 				VALUES ($1, $2, $3)`
 	_, err = db.Exec(statement, roomID, token, rawCookieValue)
 	check(err)
@@ -134,6 +137,7 @@ func ChatRoomMaker(chatroomID string, ws *websocket.Conn) map[*websocket.Conn]bo
 	Chatroom.Clients = make(map[*websocket.Conn]bool)
 	Chatroom.Clients[ws] = true
 	clients := Chatroom.Clients
+	roomsRegistry[chatroomID] = Chatroom
 	return clients
 }
 
@@ -186,6 +190,18 @@ func chatBroker(clients map[*websocket.Conn]bool, ws *websocket.Conn) {
 func ClientListHandler(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("views/base.gohtml", "views/clientlist.gohtml")
 	check(err)
+
+	// Match session cookie in CUSTOMERS TABLE to find out which organisation consultant is from.
+
+	// Using organisation, look in ROOMS TABLE to find all available chatrooms.
+	// If beingserved=true, display. Else, don't.
+
+	// When consultant clicks on roomID, redirect to chatclient/roomID.
+	// Set roomID as cookie for that specific room.
+	// And connect to another consultant's version of chatClientWSHandler.
+	// In it, get roomID cookie, use it to find the room in roomsRegistry.
+	// Add consultant's websocket to that room.
+	// Launch chatBroker.
 
 	t.ExecuteTemplate(w, "base", nil)
 }

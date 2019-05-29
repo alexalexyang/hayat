@@ -24,20 +24,34 @@ func DBSetup() {
 	statement := `CREATE TABLE IF NOT EXISTS rooms (
 				timestamptz TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 				roomid TEXT UNIQUE,
-				token TEXT,
-				usercookie TEXT UNIQUE,
-				websocket TEXT UNIQUE
+				organisation TEXT,
+				sessioncookie TEXT UNIQUE,
+				websocket TEXT UNIQUE,
+				beingserved bool
 				);`
 	_, err = db.Exec(statement)
 	check(err)
 
 	// Anteroom table.
 	statement = `CREATE TABLE IF NOT EXISTS anteroom (
-		usercookie TEXT UNIQUE,
+		sessioncookie TEXT UNIQUE,
 		username TEXT UNIQUE,
 		age TEXT UNIQUE,
 		gender TEXT UNIQUE,
 		issues TEXT UNIQUE
+		);`
+	_, err = db.Exec(statement)
+	check(err)
+
+	// Customer table.
+	statement = `CREATE TABLE IF NOT EXISTS customers (
+		firstname TEXT,
+		lastname TEXT,
+		username TEXT UNIQUE,
+		email TEXT UNIQUE,
+		password TEXT UNIQUE,
+		organisation TEXT,
+		sessioncookie TEXT UNIQUE
 		);`
 	_, err = db.Exec(statement)
 	check(err)
