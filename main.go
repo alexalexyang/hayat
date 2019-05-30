@@ -20,7 +20,7 @@ func check(err error) {
 
 func main() {
 	models.DBSetup()
-	go clientlist.Listen()
+	// go clientlist.Listen()
 	log.Println("http server started on", config.Port)
 	log.Fatal(http.ListenAndServe(config.Port, initRouter()))
 }
@@ -31,6 +31,8 @@ func initRouter() *mux.Router {
 	router.HandleFunc("/anteroom", chat.AnteroomHandler)
 	router.HandleFunc("/chatclientws", chat.ChatClientWSHandler)
 	router.HandleFunc("/chatclient/{id:[\\w\\-]+}", chat.ChatClientHandler)
+
+	router.HandleFunc("/clientlistws", clientlist.ClientListWSHandler)
 	router.HandleFunc("/clientlist", clientlist.ClientListHandler)
 
 	router.HandleFunc("/Login", login.LoginHandler)

@@ -12,8 +12,9 @@ window.onload = function() {
     };
 
     socket.onmessage = function(event) {
-        var msg = JSON.parse(event.data);
         console.log(event)
-        listMsgs.innerHTML += '<li class="received"><span>Received:</span>' + msg["int"] + '</li>';
+        var msg = JSON.parse(event.data);
+        console.log(event.data)
+        listMsgs.innerHTML += '<li class="received"><span>Received:</span>' + msg + '</li>';
     };
 };

@@ -154,7 +154,7 @@ func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
 	// Create a chatroom.
 	clients := ChatRoomMaker(roomCookie.Value, ws)
 
-	// Use cookie to find the user and enter into chatBroker.
+	// Use cookie to update client room details.
 	db, err := sql.Open(config.Driver, config.DBconfig)
 	check(err)
 	defer db.Close()
@@ -163,13 +163,13 @@ func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = db.Exec(statement, false, cookieValue)
 	check(err)
 
+	// Use cookie to get client's name from their profile.
 	statement = `SELECT username from clientprofiles WHERE sessioncookie = $1;`
 	row := db.QueryRow(statement, cookieValue)
 	var username string
 	row.Scan(&username)
 	// check(err)
 
-	// Has to become chatBroker(clients, ws, InstanceUser) so we can send out his username.
 	chatBroker(clients, ws, username)
 }
 

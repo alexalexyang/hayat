@@ -1,6 +1,7 @@
 package clientlist
 
 import (
+	"database/sql"
 	"fmt"
 	"html/template"
 	"log"
@@ -8,12 +9,53 @@ import (
 	"time"
 
 	"github.com/alexalexyang/hayat/config"
+	"github.com/gorilla/websocket"
 	"github.com/lib/pq"
 )
 
 func check(err error) {
 	if err != nil {
 		log.Fatal(err)
+	}
+}
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
+
+func Listen(ws *websocket.Conn) {
+
+	reportProblem := func(ev pq.ListenerEventType, err error) {
+		check(err)
+	}
+
+	listener := pq.NewListener(config.DBconfig, 10*time.Second, time.Minute, reportProblem)
+	err := listener.Listen("events")
+	check(err)
+
+	fmt.Println("Start monitoring PostgreSQL...")
+	for {
+		waitForNotification(listener, ws)
+	}
+}
+
+func waitForNotification(l *pq.Listener, ws *websocket.Conn) {
+	for {
+		select {
+		case n := <-l.Notify:
+			fmt.Println("Received data from channel [", n.Channel, "] :")
+			fmt.Println(n.Extra)
+			ws.WriteJSON(n.Extra)
+		case <-time.After(120 * time.Second):
+			fmt.Println("Received no events for 120 seconds, checking connection")
+			go func() {
+				l.Ping()
+			}()
+		}
 	}
 }
 
@@ -36,35 +78,61 @@ func ClientListHandler(w http.ResponseWriter, r *http.Request) {
 	t.ExecuteTemplate(w, "base", nil)
 }
 
-func Listen() {
+func ClientListWSHandler(w http.ResponseWriter, r *http.Request) {
 
+	db, err := sql.Open(config.Driver, config.DBconfig)
+	check(err)
+	defer db.Close()
+
+	// Find by organisation too.
+	statement := `SELECT roomid FROM rooms WHERE beingserved = 'f';`
+	rows, err := db.Query(statement)
+	check(err)
+	defer rows.Close()
+
+	notBeingServed := make(map[string]bool)
+
+	for rows.Next() {
+		var roomid string
+		err = rows.Scan(&roomid)
+		check(err)
+		// beingserved := strconv.FormatBool(beingservedBool)
+
+		notBeingServed[roomid] = false
+	}
+
+	for k, v := range notBeingServed {
+		fmt.Println(k[:8], v)
+	}
+
+	ws, err := upgrader.Upgrade(w, r, nil)
+	check(err)
+	defer ws.Close()
+
+	ws.WriteJSON(notBeingServed)
+
+	// go Listen(ws)
 	reportProblem := func(ev pq.ListenerEventType, err error) {
 		check(err)
 	}
 
 	listener := pq.NewListener(config.DBconfig, 10*time.Second, time.Minute, reportProblem)
-	err := listener.Listen("events")
+	err = listener.Listen("events")
 	check(err)
 
 	fmt.Println("Start monitoring PostgreSQL...")
-	for {
-		waitForNotification(listener)
-	}
-}
 
-func waitForNotification(l *pq.Listener) {
 	for {
 		select {
-		case n := <-l.Notify:
+		case n := <-listener.Notify:
 			fmt.Println("Received data from channel [", n.Channel, "] :")
 			fmt.Println(n.Extra)
-			return
+			ws.WriteJSON(n.Extra)
 		case <-time.After(120 * time.Second):
 			fmt.Println("Received no events for 120 seconds, checking connection")
 			go func() {
-				l.Ping()
+				listener.Ping()
 			}()
-			return
 		}
 	}
 }
