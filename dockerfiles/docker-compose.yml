@@ -10,7 +10,7 @@ services:
     volumes:
       - ./shared:/dbdump
     networks:
-      - mynet
+      - hayatnet
 
 networks:
-  mynet:
+  hayatnet:

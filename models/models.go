@@ -24,7 +24,7 @@ func DBSetup() {
 	statement := `CREATE TABLE IF NOT EXISTS rooms (
 				timestamptz TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 				roomid TEXT UNIQUE,
-				organisation TEXT,
+				token TEXT,
 				sessioncookie TEXT UNIQUE,
 				websocket TEXT UNIQUE,
 				beingserved bool
@@ -35,10 +35,10 @@ func DBSetup() {
 	// Anteroom table.
 	statement = `CREATE TABLE IF NOT EXISTS anteroom (
 		sessioncookie TEXT UNIQUE,
-		username TEXT UNIQUE,
-		age TEXT UNIQUE,
-		gender TEXT UNIQUE,
-		issues TEXT UNIQUE
+		username TEXT,
+		age TEXT,
+		gender TEXT,
+		issues TEXT
 		);`
 	_, err = db.Exec(statement)
 	check(err)
@@ -64,36 +64,32 @@ func DBSetup() {
     
     BEGIN
     
-        -- Convert the old or new row to JSON, based on the kind of action.
-        -- Action = DELETE?             -> OLD row
-        -- Action = INSERT or UPDATE?   -> NEW row
         IF (TG_OP = 'DELETE') THEN
             data = row_to_json(OLD);
         ELSE
             data = row_to_json(NEW);
         END IF;
         
-        -- Contruct the notification as a JSON string.
         notification = json_build_object(
                           'table',TG_TABLE_NAME,
                           'action', TG_OP,
                           'data', data);
         
                         
-        -- Execute pg_notify(channel, notification)
         PERFORM pg_notify('events',notification::text);
         
-        -- Result is ignored since this is an AFTER trigger
         RETURN NULL; 
     END;
     
-$$ LANGUAGE plpgsql;`
+	$$ LANGUAGE plpgsql;`
+
 	_, err = db.Exec(statement)
 	check(err)
 
-	statement = `CREATE TRIGGER products_notify_event
-	AFTER INSERT OR UPDATE OR DELETE ON rooms
-		FOR EACH ROW EXECUTE PROCEDURE notify_event();`
+	statement = `DROP TRIGGER IF EXISTS products_notify_event ON rooms;
+				CREATE TRIGGER products_notify_event
+				AFTER INSERT OR UPDATE OR DELETE ON rooms
+				FOR EACH ROW EXECUTE PROCEDURE notify_event();`
 	_, err = db.Exec(statement)
 	check(err)
 }

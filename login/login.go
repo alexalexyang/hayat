@@ -12,7 +12,7 @@ func check(err error) {
 	}
 }
 
-func loginHandler(w http.ResponseWriter, r *http.Request) {
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("views/base.gohtml", "views/login/login.gohtml")
 	check(err)
 

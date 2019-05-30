@@ -186,22 +186,3 @@ func chatBroker(clients map[*websocket.Conn]bool, ws *websocket.Conn) {
 		}
 	}
 }
-
-func ClientListHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("views/base.gohtml", "views/clientlist.gohtml")
-	check(err)
-
-	// Match session cookie in CUSTOMERS TABLE to find out which organisation consultant is from.
-
-	// Using organisation, look in ROOMS TABLE to find all available chatrooms.
-	// If beingserved=true, display. Else, don't.
-
-	// When consultant clicks on roomID, redirect to chatclient/roomID.
-	// Set roomID as cookie for that specific room.
-	// And connect to another consultant's version of chatClientWSHandler.
-	// In it, get roomID cookie, use it to find the room in roomsRegistry.
-	// Add consultant's websocket to that room.
-	// Launch chatBroker.
-
-	t.ExecuteTemplate(w, "base", nil)
-}
