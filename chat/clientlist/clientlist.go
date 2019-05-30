@@ -60,7 +60,7 @@ func waitForNotification(l *pq.Listener) {
 			fmt.Println(n.Extra)
 			return
 		case <-time.After(120 * time.Second):
-			fmt.Println("Received no events for 90 seconds, checking connection")
+			fmt.Println("Received no events for 120 seconds, checking connection")
 			go func() {
 				l.Ping()
 			}()

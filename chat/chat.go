@@ -2,7 +2,6 @@ package chat
 
 import (
 	"database/sql"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -90,7 +89,6 @@ func AnteroomHandler(w http.ResponseWriter, r *http.Request) {
 
 	// This is the unique ID for the client.
 	rawCookieValue := uuid.Must(uuid.NewV4()).String()
-	fmt.Println("CookieValue1:", rawCookieValue)
 	encodedValue := encoder(rawCookieValue)
 	cookieSetter(w, "hayatclient", encodedValue)
 
@@ -111,13 +109,13 @@ func AnteroomHandler(w http.ResponseWriter, r *http.Request) {
 	check(err)
 	defer db.Close()
 
-	statement := `INSERT INTO anteroom (sessioncookie, username, age, gender, issues)
+	statement := `INSERT INTO clientprofiles (sessioncookie, username, age, gender, issues)
 	VALUES ($1, $2, $3, $4, $5)`
 	_, err = db.Exec(statement, rawCookieValue, username, age, gender, issues)
 	check(err)
 
-	statement = `INSERT INTO rooms (roomid, token, sessioncookie)
-				VALUES ($1, $2, $3)`
+	statement = `INSERT INTO rooms (roomid, organisation, sessioncookie)
+				VALUES ($1, $2, $3);`
 	_, err = db.Exec(statement, roomID, token, rawCookieValue)
 	check(err)
 
@@ -146,10 +144,8 @@ func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
 	encodedValue := cookie.Value
 	check(err)
 	cookieValue := decoder(encodedValue)
-	fmt.Println("CookieValue2:", cookieValue)
 
 	roomCookie, err := r.Cookie("clientroom")
-	fmt.Println("RoomValue2:", roomCookie.Value)
 
 	ws, err := upgrader.Upgrade(w, r, nil)
 	check(err)
@@ -159,13 +155,27 @@ func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
 	clients := ChatRoomMaker(roomCookie.Value, ws)
 
 	// Use cookie to find the user and enter into chatBroker.
+	db, err := sql.Open(config.Driver, config.DBconfig)
+	check(err)
+	defer db.Close()
+
+	statement := `UPDATE rooms SET beingserved = $1 WHERE sessioncookie = $2;`
+	_, err = db.Exec(statement, false, cookieValue)
+	check(err)
+
+	statement = `SELECT username from clientprofiles WHERE sessioncookie = $1;`
+	row := db.QueryRow(statement, cookieValue)
+	var username string
+	row.Scan(&username)
+	// check(err)
 
 	// Has to become chatBroker(clients, ws, InstanceUser) so we can send out his username.
-	chatBroker(clients, ws)
+	chatBroker(clients, ws, username)
 }
 
-func chatBroker(clients map[*websocket.Conn]bool, ws *websocket.Conn) {
+func chatBroker(clients map[*websocket.Conn]bool, ws *websocket.Conn, username string) {
 	var msg Message
+	msg.Username = username
 	for {
 		// Read in a new message as JSON and map it to a Message object
 		err := ws.ReadJSON(&msg)
@@ -174,7 +184,6 @@ func chatBroker(clients map[*websocket.Conn]bool, ws *websocket.Conn) {
 			delete(clients, ws)
 			break
 		}
-		fmt.Println(msg)
 		// Send the newly received message to the broadcast channel
 		for client := range clients {
 			err := client.WriteJSON(msg)

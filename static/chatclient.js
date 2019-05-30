@@ -25,7 +25,6 @@ window.onload = function() {
 
 
         const myObj = {
-            username: 'Skip',
             message: txtMsg.value
         };
 
@@ -37,7 +36,7 @@ window.onload = function() {
         socket.send(msg);
 
         // Adding the msg in a list of sent messages.
-        listMsgs.innerHTML += '<li class="sent"><span>Sent:</span>' + msg + '</li>';
+        // listMsgs.innerHTML += '<li class="sent"><span>Sent:</span>' + msg + '</li>';
 
         // Cleaning up the field after sending.
         txtMsg.value = '';
@@ -47,9 +46,8 @@ window.onload = function() {
 
     socket.onmessage = function(event) {
         var msg = JSON.parse(event.data);
-        console.log(event)
-        console.log(msg["username"])
-        listMsgs.innerHTML += '<li class="received"><span>Received:</span>' + msg.message + '</li>';
+        // console.log(event)
+        listMsgs.innerHTML += '<li class="received">' + msg.username + ": " + msg.message + '</li>';
     };
 
     socket.onclose = function(event) {
