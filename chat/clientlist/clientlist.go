@@ -2,6 +2,7 @@ package clientlist
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -28,8 +29,6 @@ var upgrader = websocket.Upgrader{
 }
 
 func Listen(ws *websocket.Conn) {
-
-	ws.WriteJSON("testties")
 	reportProblem := func(ev pq.ListenerEventType, err error) {
 		check(err)
 	}
@@ -50,7 +49,10 @@ func waitForNotification(l *pq.Listener, ws *websocket.Conn) {
 		case n := <-l.Notify:
 			fmt.Println("Received data from channel [", n.Channel, "] :")
 			fmt.Println(n.Extra)
-			ws.WriteJSON(n.Extra)
+			data := notBeingServed{}
+			_ = json.Unmarshal([]byte(n.Extra), &data)
+			payload := []notBeingServed{data}
+			ws.WriteJSON(payload)
 		case <-time.After(120 * time.Second):
 			fmt.Println("Received no events for 120 seconds, checking connection")
 			go func() {
@@ -79,6 +81,11 @@ func ClientListHandler(w http.ResponseWriter, r *http.Request) {
 	t.ExecuteTemplate(w, "base", nil)
 }
 
+type notBeingServed struct {
+	Roomid      string `json:"roomid"`
+	Beingserved bool   `json:"beingserved"`
+}
+
 func ClientListWSHandler(w http.ResponseWriter, r *http.Request) {
 
 	db, err := sql.Open(config.Driver, config.DBconfig)
@@ -91,26 +98,25 @@ func ClientListWSHandler(w http.ResponseWriter, r *http.Request) {
 	check(err)
 	defer rows.Close()
 
-	notBeingServed := make(map[string]bool)
+	var serviceSlice []notBeingServed
 
 	for rows.Next() {
-		var roomid string
-		err = rows.Scan(&roomid)
+		serveme := notBeingServed{}
+		err = rows.Scan(&serveme.Roomid)
 		check(err)
-		// beingserved := strconv.FormatBool(beingservedBool)
-
-		notBeingServed[roomid] = false
+		serveme.Beingserved = false
+		serviceSlice = append(serviceSlice, serveme)
 	}
 
-	for k, v := range notBeingServed {
-		fmt.Println(k[:8], v)
-	}
+	fmt.Println(serviceSlice)
 
 	ws, err := upgrader.Upgrade(w, r, nil)
 	check(err)
 	defer ws.Close()
 
-	ws.WriteJSON(notBeingServed)
+	ws.WriteJSON(serviceSlice)
+	// msg, _ := json.Marshal(serviceSlice)
+	// ws.WriteMessage(1, msg)
 
 	Listen(ws)
 }

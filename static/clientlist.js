@@ -12,9 +12,13 @@ window.onload = function() {
     };
 
     socket.onmessage = function(event) {
-        console.log(event)
         var msg = JSON.parse(event.data);
         console.log(event.data)
-        listMsgs.innerHTML += '<li class="received"><span>Received:</span>' + msg + '</li>';
+
+        for (let i = 0; i < msg.length; i++) {
+            listMsgs.innerHTML += '<li class=' + msg[i].roomid + '>' + msg[i].roomid + '</li>';
+        }
+
+        // listMsgs.innerHTML += '<li class=' + msg.roomid + '>' + msg.roomid + '</li>';
     };
 };

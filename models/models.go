@@ -92,7 +92,7 @@ func DBSetup() {
 
 	statement = `DROP TRIGGER IF EXISTS products_notify_event ON rooms;
 				CREATE TRIGGER products_notify_event
-				AFTER INSERT OR UPDATE OR DELETE ON rooms
+				AFTER UPDATE ON rooms
 				FOR EACH ROW EXECUTE PROCEDURE notify_event();`
 	_, err = db.Exec(statement)
 	check(err)
