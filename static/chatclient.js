@@ -1,5 +1,6 @@
 window.onload = function() {
-
+    var here = document.location.href;
+    console.log(here);
     // get the references of the page elements.
     var form = document.getElementById('form-msg');
     var txtMsg = document.getElementById('msg');

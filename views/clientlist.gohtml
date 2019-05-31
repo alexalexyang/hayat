@@ -1,7 +1,46 @@
-{{define "yield"}}
+{{/* {{define "yield"}}
 	  <div id="page-wrapper">
-
-		  <ul id="msgs"></ul>
+		  <ul id="rooms"></ul>
 	  </div>
 	  <script src="static/clientlist.js"></script>
+{{end}} */}}
+
+
+{{define "yield"}}
+	<iframe name="hiddenFrame" width="0" height="0" border="0" style="display: none;"></iframe>
+	
+	<form id="clientlistForm" name="clientlistForm" action="http://localhost:8000/clientlist" method="post" target="hiddenFrame">
+		<input id="inputRoom" type="hidden" name="roomid" value="0"></input>
+	</form>
+
+	<div id="rooms">
+		<ul id="room"></ul>
+	</div>
+	<script src="static/clientlist.js"></script>
 {{end}}
+{{/* 
+<form id="form" name="anteroomForm" action="http://localhost:8000/anteroom" method="post">
+    <input type="hidden" name="token" value="secret_key_here">
+  <p>
+    <label>Username</label><br>
+    <input type="text" name="username">
+  </p>
+    <p>
+    <label>Age</label><br>
+    <input type="number" name="age">
+  </p>
+    <p>
+    <label>Gender</label><br>
+    <input type="text" name="gender">
+  </p>
+  <p>
+    <label>Issues</label><br>
+    <textarea name="issues" rows="10" cols="30"></textarea>
+  </p>
+  <p>
+    <button type="submit">Submit</button>
+    <button type="reset">Reset form</button>
+  </p>
+</form>
+
+<script src="static/anteroom.js"></script> */}}

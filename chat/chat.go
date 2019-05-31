@@ -2,6 +2,7 @@ package chat
 
 import (
 	"database/sql"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -140,6 +141,30 @@ func ChatRoomMaker(chatroomID string, ws *websocket.Conn) map[*websocket.Conn]bo
 }
 
 func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.URL)
+	cook, err := r.Cookie("clientroom")
+	fmt.Println("c:", cook.Name)
+
+	cookies := r.Cookies()
+	cookieMap := make(map[string]string)
+	for _, cookie := range cookies {
+		cookieMap[cookie.Name] = cookie.Value
+	}
+
+	if _, ok := cookieMap["consultant"]; ok {
+		roomID := cookieMap["clientroom"]
+		if _, ok := roomsRegistry[roomID]; ok {
+			room := roomsRegistry[roomID]
+
+			ws, err := upgrader.Upgrade(w, r, nil)
+			check(err)
+			defer ws.Close()
+			room.Clients[ws] = true
+
+			chatBroker(room.Clients, ws, "consultant")
+		}
+	}
+
 	cookie, err := r.Cookie("hayatclient")
 	encodedValue := cookie.Value
 	check(err)
@@ -194,4 +219,15 @@ func chatBroker(clients map[*websocket.Conn]bool, ws *websocket.Conn, username s
 			}
 		}
 	}
+}
+
+func ChatConsultantWSHandler(w http.ResponseWriter, r *http.Request) {
+	// params := mux.Vars(r)
+
+	for _, ck := range r.Cookies() {
+		if ck.Name == "hayatclient" {
+
+		}
+	}
+
 }
