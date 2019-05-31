@@ -29,6 +29,7 @@ var upgrader = websocket.Upgrader{
 
 func Listen(ws *websocket.Conn) {
 
+	ws.WriteJSON("testties")
 	reportProblem := func(ev pq.ListenerEventType, err error) {
 		check(err)
 	}
@@ -111,28 +112,5 @@ func ClientListWSHandler(w http.ResponseWriter, r *http.Request) {
 
 	ws.WriteJSON(notBeingServed)
 
-	// go Listen(ws)
-	reportProblem := func(ev pq.ListenerEventType, err error) {
-		check(err)
-	}
-
-	listener := pq.NewListener(config.DBconfig, 10*time.Second, time.Minute, reportProblem)
-	err = listener.Listen("events")
-	check(err)
-
-	fmt.Println("Start monitoring PostgreSQL...")
-
-	for {
-		select {
-		case n := <-listener.Notify:
-			fmt.Println("Received data from channel [", n.Channel, "] :")
-			fmt.Println(n.Extra)
-			ws.WriteJSON(n.Extra)
-		case <-time.After(120 * time.Second):
-			fmt.Println("Received no events for 120 seconds, checking connection")
-			go func() {
-				listener.Ping()
-			}()
-		}
-	}
+	Listen(ws)
 }

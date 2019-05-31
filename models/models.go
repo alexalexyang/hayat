@@ -69,26 +69,18 @@ func DBSetup() {
 	check(err)
 
 	statement = `CREATE OR REPLACE FUNCTION notify_event() RETURNS TRIGGER AS $$
-
-    DECLARE 
-        data json;
-        notification json;
     
     BEGIN
     
-        IF (TG_OP = 'DELETE') THEN
-            data = row_to_json(OLD);
-        ELSE
-            data = row_to_json(NEW);
-        END IF;
-        
-        notification = json_build_object(
-                          'table',TG_TABLE_NAME,
-                          'action', TG_OP,
-                          'data', data);
-        
-                        
-        PERFORM pg_notify('events',notification::text);
+	PERFORM (
+		with payload(roomid, beingserved) as
+		(
+		  select NEW.roomid,
+				 NEW.beingserved
+		)
+		select pg_notify('events', row_to_json(payload)::text)
+		  from payload
+	 );
         
         RETURN NULL; 
     END;
