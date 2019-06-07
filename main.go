@@ -4,10 +4,11 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/alexalexyang/hayat/auth"
+
 	"github.com/alexalexyang/hayat/chat"
 	"github.com/alexalexyang/hayat/chat/clientlist"
 	"github.com/alexalexyang/hayat/config"
-	"github.com/alexalexyang/hayat/login"
 	"github.com/alexalexyang/hayat/models"
 	"github.com/gorilla/mux"
 )
@@ -35,6 +36,6 @@ func initRouter() *mux.Router {
 	router.HandleFunc("/clientlistws", clientlist.ClientListWSHandler)
 	router.HandleFunc("/clientlist", clientlist.ClientListHandler)
 
-	router.HandleFunc("/Login", login.LoginHandler)
+	router.HandleFunc("/register", auth.RegisterHandler)
 	return router
 }

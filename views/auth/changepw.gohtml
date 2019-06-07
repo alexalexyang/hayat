@@ -1,0 +1,22 @@
+{{define "yield" }}
+
+<h1>
+    <label>Change Password</label>
+</h2>
+
+<form id="changepw" name="changepw" action="http://localhost:8000/changepw/" method="post">
+  <p>
+    <label>New password</label><br>
+    <input type="password" name="password">
+  </p>
+  <p>
+    <button type="submit">Submit</button>
+  </p>
+</form>
+
+<script>
+  var path = window.location.href;
+  document.changepw.action = path
+</script>
+
+{{end}}

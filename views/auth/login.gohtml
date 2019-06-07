@@ -1,0 +1,23 @@
+{{define "yield" }}
+
+<h1>
+    <label>Login</label>
+</h2>
+
+<form id="loginform" name="login" action="http://localhost:8000/login" method="post">
+  <p>
+    <label>Email</label><br>
+    <input type="email" name="email">
+  </p>
+  <p>
+    <label>Password</label><br>
+    <input type="password" name="password">
+  </p>
+
+  <p>
+    <button type="submit">Submit</button>
+    <button type="reset">Reset form</button>
+  </p>
+</form>
+
+{{end}}

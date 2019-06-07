@@ -1,0 +1,26 @@
+{{define "base"}}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="icon" type="image/png" href="static/favicon.png">
+    <title>SimpleAuth Example</title>
+    <meta name="description" content="Just an example site for SimpleAuth.">
+    <meta name="author" content="Alex Yang">
+
+    {{/* <link rel="stylesheet" href="static/style.css" /> */}}
+
+</head>
+
+<body>
+
+    {{template "yield" .}}
+
+</body>
+
+</html>
+
+{{end}}

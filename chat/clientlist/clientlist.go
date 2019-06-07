@@ -74,22 +74,9 @@ func ClientListHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Match session cookie in CUSTOMERS TABLE to find out which organisation consultant is from.
-
-	// Using organisation, look in ROOMS TABLE to find all available chatrooms.
-	// If beingserved=true, display. Else, don't.
-
-	// When consultant clicks on roomID, redirect to chatclient/roomID.
-	// Set roomID as cookie for that specific room.
-	// And connect to another consultant's version of chatClientWSHandler.
-	// In it, get roomID cookie, use it to find the room in roomsRegistry.
-	// Add consultant's websocket to that room.
-	// Launch chatBroker.
-	fmt.Println("Post")
 	roomid := r.FormValue("roomid")
-	fmt.Println(roomid)
 	cookie1 := http.Cookie{
-		Name:  "clientroom",
+		Name:  "clientroom", // Set to roomid
 		Value: roomid,
 		// Expires:  time.Now().Add(time.Hour),
 		HttpOnly: true,
