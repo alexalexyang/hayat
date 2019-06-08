@@ -105,7 +105,7 @@ type notBeingServed struct {
 
 func ClientListWSHandler(w http.ResponseWriter, r *http.Request) {
 
-	db, err := sql.Open(config.Driver, config.DBconfig)
+	db, err := sql.Open(config.DBType, config.DBconfig)
 	check(err)
 	defer db.Close()
 

@@ -30,12 +30,22 @@ func initRouter() *mux.Router {
 	router := mux.NewRouter()
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	router.HandleFunc("/anteroom", chat.AnteroomHandler)
+
+	// Chat client
 	router.HandleFunc("/chatclientws", chat.ChatClientWSHandler)
 	router.HandleFunc("/chatclient/{id:[\\w\\-]+}", chat.ChatClientHandler)
 
+	// Clientlist
 	router.HandleFunc("/clientlistws", clientlist.ClientListWSHandler)
 	router.HandleFunc("/clientlist", clientlist.ClientListHandler)
 
+	// Auth
 	router.HandleFunc("/register", auth.RegisterHandler)
+	router.HandleFunc("/login", auth.LoginHandler)
+	router.HandleFunc("/logout", auth.LogoutHandler)
+	router.HandleFunc("/forgotpw", auth.ForgotPwHandler)
+	router.HandleFunc("/changepw/{id:[\\w\\-]+}", auth.ChangePwHandler)
+	router.HandleFunc("/deleteaccount", auth.DeleteAccountHandler)
+
 	return router
 }

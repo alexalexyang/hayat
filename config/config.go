@@ -1,22 +1,30 @@
 package config
 
-import "fmt"
-
-// Server config
-var Domain = "http://localhost"
-var Port = ":8000"
-
-// Db config
-var Driver = "postgres"
-
-const (
-	host     = "localhost"
-	port     = 5431
-	user     = "postgres"
-	password = "1234"
-	dbname   = "hayatdb"
+import (
+	"fmt"
+	"os"
 )
 
-var DBconfig = fmt.Sprintf("host=%s port=%d user=%s "+
-	"password=%s dbname=%s sslmode=disable",
-	host, port, user, password, dbname)
+var (
+	// Domain config
+	Domain   = "localhost"
+	Port     = ":8000"
+	Protocol = "http://"
+
+	// Db config
+	DBType     = "postgres"
+	DBHost     = "localhost"
+	DBPort     = "5431"
+	DBUser     = "postgres"
+	DBPassword = "1234"
+	DBName     = "hayatdb"
+	DBconfig   = fmt.Sprintf("host=%s port=%s user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		DBHost, DBPort, DBUser, DBPassword, DBName)
+
+	// Email config
+	EmailID  = os.Getenv("MYEMAIL")
+	EmailPw  = os.Getenv("MYPW")
+	SmtpHost = "smtp.gmail.com"
+	SmtpPort = "587"
+)

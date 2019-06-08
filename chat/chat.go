@@ -106,7 +106,7 @@ func AnteroomHandler(w http.ResponseWriter, r *http.Request) {
 	cookieSetter(w, "clientroom", roomID)
 
 	// Add anteroomValues to db.
-	db, err := sql.Open(config.Driver, config.DBconfig)
+	db, err := sql.Open(config.DBType, config.DBconfig)
 	check(err)
 	defer db.Close()
 
@@ -180,7 +180,7 @@ func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
 	clients := ChatRoomMaker(roomCookie.Value, ws)
 
 	// Use cookie to update client room details.
-	db, err := sql.Open(config.Driver, config.DBconfig)
+	db, err := sql.Open(config.DBType, config.DBconfig)
 	check(err)
 	defer db.Close()
 
