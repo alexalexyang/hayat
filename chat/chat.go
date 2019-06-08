@@ -120,7 +120,6 @@ func AnteroomHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = db.Exec(statement, roomID, token, rawCookieValue)
 	check(err)
 
-	// http.Redirect(w, r, "http://localhost:3000/contact", http.StatusFound)
 	http.Redirect(w, r, config.Domain+config.Port+"/chatclient/"+roomID, http.StatusSeeOther)
 }
 

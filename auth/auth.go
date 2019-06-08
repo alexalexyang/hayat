@@ -40,7 +40,12 @@ func DeleteAccountHandler(w http.ResponseWriter, r *http.Request) {
 		displayTemplate(w, r, "views/base.gohtml", "views/auth/deleteaccount.gohtml")
 		return
 	}
-	Cfg.DeleteAccount(w, r)
+	if Cfg.DeleteAccount(w, r) == false {
+		w.WriteHeader(http.StatusResetContent)
+		return
+	}
+	// Redirect to dashboard.
+	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/anteroom", http.StatusSeeOther)
 }
 
 func ChangePwHandler(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +53,12 @@ func ChangePwHandler(w http.ResponseWriter, r *http.Request) {
 		displayTemplate(w, r, "views/base.gohtml", "views/auth/changepw.gohtml")
 		return
 	}
-	Cfg.ChangePw(w, r)
+	if Cfg.ChangePw(w, r) == false {
+		w.WriteHeader(http.StatusResetContent)
+		return
+	}
+	// Redirect to dashboard.
+	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/anteroom", http.StatusSeeOther)
 }
 
 func ForgotPwHandler(w http.ResponseWriter, r *http.Request) {
@@ -56,7 +66,12 @@ func ForgotPwHandler(w http.ResponseWriter, r *http.Request) {
 		displayTemplate(w, r, "views/base.gohtml", "views/auth/forgotpw.gohtml")
 		return
 	}
-	Cfg.ForgotPw(w, r)
+	if Cfg.ForgotPw(w, r) == false {
+		w.WriteHeader(http.StatusResetContent)
+		return
+	}
+	// Redirect to dashboard.
+	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/anteroom", http.StatusSeeOther)
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
@@ -64,7 +79,12 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		displayTemplate(w, r, "views/base.gohtml", "views/auth/logout.gohtml")
 		return
 	}
-	Cfg.Logout(w, r)
+	if Cfg.Logout(w, r) == false {
+		w.WriteHeader(http.StatusResetContent)
+		return
+	}
+	// Redirect to dashboard.
+	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/anteroom", http.StatusSeeOther)
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -72,7 +92,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		displayTemplate(w, r, "views/base.gohtml", "views/auth/login.gohtml")
 		return
 	}
-	Cfg.Login(w, r)
+	if Cfg.Login(w, r) == false {
+		w.WriteHeader(http.StatusResetContent)
+		return
+	}
+	// Redirect to dashboard.
+	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/anteroom", http.StatusSeeOther)
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -80,5 +105,10 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		displayTemplate(w, r, "views/base.gohtml", "views/auth/register.gohtml")
 		return
 	}
-	Cfg.Register(r)
+	if Cfg.Register(r) == false {
+		w.WriteHeader(http.StatusResetContent)
+		return
+	}
+	// Redirect to dashboard.
+	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/anteroom", http.StatusSeeOther)
 }
