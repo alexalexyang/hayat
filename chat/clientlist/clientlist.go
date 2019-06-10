@@ -133,3 +133,13 @@ func ClientListWSHandler(w http.ResponseWriter, r *http.Request) {
 
 	Listen(ws)
 }
+
+func DashboardHandler(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles("views/base.gohtml", "views/dashboard.gohtml")
+	check(err)
+	// t.ExecuteTemplate(w, "base", nil)
+	if r.Method != http.MethodPost {
+		t.ExecuteTemplate(w, "base", nil)
+		return
+	}
+}

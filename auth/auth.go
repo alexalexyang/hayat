@@ -100,12 +100,56 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/anteroom", http.StatusSeeOther)
 }
 
-func RegisterHandler(w http.ResponseWriter, r *http.Request) {
+func RegisterOrgHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		displayTemplate(w, r, "views/base.gohtml", "views/auth/register.gohtml")
+		displayTemplate(w, r, "views/base.gohtml", "views/auth/registerorg.gohtml")
 		return
 	}
 	if Cfg.Register(r) == false {
+		w.WriteHeader(http.StatusResetContent)
+		return
+	}
+	// Redirect to dashboard.
+	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/anteroom", http.StatusSeeOther)
+}
+
+func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		displayTemplate(w, r, "views/base.gohtml", "views/auth/registeruser.gohtml")
+		return
+	}
+	if Cfg.Register(r) == false {
+		w.WriteHeader(http.StatusResetContent)
+		return
+	}
+	// Redirect to dashboard.
+	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/anteroom", http.StatusSeeOther)
+}
+
+func InviteHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		displayTemplate(w, r, "views/base.gohtml", "views/auth/invite.gohtml")
+		return
+	}
+	if Cfg.Invite(w, r) == false {
+		w.WriteHeader(http.StatusResetContent)
+		return
+	}
+	// Redirect to dashboard.
+	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/anteroom", http.StatusSeeOther)
+}
+
+func UpdateHandler(w http.ResponseWriter, r *http.Request) {
+	userProfile, _ := Cfg.GetUser(r)
+	if r.Method != http.MethodPost {
+		t, err := template.ParseFiles("views/base.gohtml", "views/auth/update.gohtml")
+		if err != nil {
+			log.Fatal(err)
+		}
+		t.ExecuteTemplate(w, "base", userProfile)
+		return
+	}
+	if Cfg.Update(r) == false {
 		w.WriteHeader(http.StatusResetContent)
 		return
 	}

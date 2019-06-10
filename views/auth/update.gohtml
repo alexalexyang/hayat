@@ -1,0 +1,26 @@
+{{define "yield" }}
+
+<h1>
+    Update
+</h1>
+
+<form id="updateForm" name="updateForm" action="http://localhost:8000/update" method="post">
+  <p>
+    <label>Username</label><br>
+    <input type="text" name="username" placeholder="{{.username}}">
+  </p>
+  <p>
+    <label>Email</label><br>
+    <input type="email" name="email" placeholder="{{.email}}">
+  </p>
+  <p>
+    <label>Password</label><br>
+    <input type="password" name="password" placeholder="{{.password}}"></textarea>
+  </p>
+  <p>
+    <button type="submit">Submit</button>
+    <button type="reset">Reset form</button>
+  </p>
+</form>
+
+{{end}}

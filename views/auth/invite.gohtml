@@ -1,0 +1,23 @@
+{{define "yield" }}
+
+<h1>
+    You're invited
+</h1>
+
+<form id="invite" name="invite" action="http://localhost:8000/invite" method="post">
+  <p>
+    <label>Email</label><br>
+    <input type="email " name="email">
+  </p>
+  <p>
+  <select type="text" name="role">
+    <option value="staff">Staff</option>
+    <option value="manager">Manager</option>
+  </select>
+  </p>
+  <p>
+    <button type="submit">Submit</button>
+  </p>
+</form>
+
+{{end}}
