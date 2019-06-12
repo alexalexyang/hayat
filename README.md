@@ -15,3 +15,7 @@ https://dzone.com/articles/notify-events-from-postgresql-to-external-listener
 ## Listen and notify on column with postgres
 
 https://tapoueh.org/blog/2018/07/postgresql-listen/notify/
+
+## How to have iframes in tabs
+
+https://howto.caspio.com/tech-tips-and-articles/advanced-customizations/create-embeddable-tabbed-interface/

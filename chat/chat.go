@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gorilla/mux"
+
 	"github.com/alexalexyang/hayat/config"
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/securecookie"
@@ -103,6 +105,8 @@ func AnteroomHandler(w http.ResponseWriter, r *http.Request) {
 
 	// chatroomID is used to list the room in the clientlist.
 	roomID := uuid.Must(uuid.NewV4()).String()
+	// idslice := roomID[:8]
+	// cookieSetter(w, "clientroom-"+idslice, roomID)
 	cookieSetter(w, "clientroom", roomID)
 
 	// Add anteroomValues to db.
@@ -140,18 +144,27 @@ func ChatRoomMaker(chatroomID string, ws *websocket.Conn) map[*websocket.Conn]bo
 }
 
 func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.URL)
-	cook, err := r.Cookie("clientroom")
-	fmt.Println("c:", cook.Name)
-
+	params := mux.Vars(r)
+	urlid := params["id"]
+	fmt.Println(urlid)
 	cookies := r.Cookies()
 	cookieMap := make(map[string]string)
 	for _, cookie := range cookies {
 		cookieMap[cookie.Name] = cookie.Value
+		fmt.Println(cookieMap[cookie.Name])
+	}
+
+	var roomIDString string
+	for k, _ := range cookieMap {
+		if _, ok := roomsRegistry[k]; ok {
+			if len(roomsRegistry[k].Clients) == 1 {
+				roomIDString = k
+			}
+		}
 	}
 
 	if _, ok := cookieMap["consultant"]; ok {
-		roomID := cookieMap["clientroom"]
+		roomID := cookieMap[roomIDString]
 		if _, ok := roomsRegistry[roomID]; ok {
 			room := roomsRegistry[roomID]
 

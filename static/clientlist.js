@@ -28,8 +28,8 @@ window.onload = function() {
         for (let i = 0; i < msg.length; i++) {
             if (msg[i].beingserved == false) {
                 var roomid = msg[i].roomid
-                chats.innerHTML += `<ul id="chat_${roomid}" name="${roomid}" style="display: none;"><iframe id=${roomid} name="${roomid}"></iframe></br></ul>`;
-                listRooms.innerHTML += `<li id=${roomid} onclick="submitter('${roomid}')"><a target="${roomid}" href="http://localhost:8000/chatclient/${roomid}">${roomid}</a></li>`;
+                    // chats.innerHTML += `<ul id="chat_${roomid}" name="${roomid}" style="display: none;"><iframe id=${roomid} name="${roomid}"></iframe></br></ul>`;
+                listRooms.innerHTML += `<li id=${roomid} onclick="submitter('${roomid}')"><a target="_blank" href="http://localhost:8000/chatclient/${roomid}">${roomid}</a></li>`;
             } else {
                 document.getElementById(msg[i].roomid).remove();
             };

@@ -32,7 +32,7 @@ func initRouter() *mux.Router {
 	router.HandleFunc("/anteroom", chat.AnteroomHandler)
 
 	// Chat client
-	router.HandleFunc("/chatclientws", chat.ChatClientWSHandler)
+	router.HandleFunc("/chatclientws/{id:[\\w\\-]+}", chat.ChatClientWSHandler)
 	router.HandleFunc("/chatclient/{id:[\\w\\-]+}", chat.ChatClientHandler)
 
 	router.HandleFunc("/dashboard", clientlist.DashboardHandler)

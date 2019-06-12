@@ -1,6 +1,10 @@
 window.onload = function() {
-    var here = document.location.href;
-    console.log(here);
+
+    var pathname = document.location.pathname;
+
+    console.log(pathname);
+    // console.log(document.roomid.value);
+
     // get the references of the page elements.
     var form = document.getElementById('form-msg');
     var txtMsg = document.getElementById('msg');
@@ -9,10 +13,11 @@ window.onload = function() {
     var btnClose = document.getElementById('close');
 
     // Creating a new WebSocket connection.
-    var socket = new WebSocket('ws://localhost:8000/chatclientws');
+    var socket = new WebSocket('ws://localhost:8000/chatclientws/' + pathname.split("/")[2]);
 
     socket.onopen = function(event) {
         socketStatus.innerHTML = 'Connected to: ' + event.currentTarget.url;
+        console.log(event.currentTarget.url)
         socketStatus.className = 'open';
 
     };
@@ -24,20 +29,15 @@ window.onload = function() {
     form.onsubmit = function(e) {
         e.preventDefault();
 
-
         const myObj = {
             message: txtMsg.value
         };
-
 
         // Recovering the message of the textarea.
         var msg = JSON.stringify(myObj);
 
         // Sending the msg via WebSocket.
         socket.send(msg);
-
-        // Adding the msg in a list of sent messages.
-        // listMsgs.innerHTML += '<li class="sent"><span>Sent:</span>' + msg + '</li>';
 
         // Cleaning up the field after sending.
         txtMsg.value = '';
