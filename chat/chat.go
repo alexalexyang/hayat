@@ -131,6 +131,9 @@ func ChatRoomMaker(chatroomID string, ws *websocket.Conn) map[*websocket.Conn]bo
 }
 
 func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open(config.DBType, config.DBconfig)
+	check(err)
+	defer db.Close()
 
 	params := mux.Vars(r)
 	urlid := params["id"]
@@ -142,15 +145,6 @@ func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(cookieMap[cookie.Name])
 	}
 
-	// var roomIDString string
-	// for k, _ := range cookieMap {
-	// 	if _, ok := roomsRegistry[k]; ok {
-	// 		if len(roomsRegistry[k].Clients) == 1 {
-	// 			roomIDString = k
-	// 		}
-	// 	}
-	// }
-
 	if _, ok := cookieMap["consultant"]; ok {
 		if _, ok := roomsRegistry[urlid]; ok {
 			room := roomsRegistry[urlid]
@@ -159,6 +153,10 @@ func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
 			check(err)
 			defer ws.Close()
 			room.Clients[ws] = true
+
+			statement := `UPDATE rooms SET beingserved = $1 WHERE roomid = $2;`
+			_, err = db.Exec(statement, true, urlid)
+			check(err)
 
 			chatBroker(room.Clients, ws, cookieMap["consultantName"])
 		}
@@ -174,10 +172,6 @@ func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
 	clients := ChatRoomMaker(roomCookie.Value, ws)
 
 	// Use cookie to update client room details.
-	db, err := sql.Open(config.DBType, config.DBconfig)
-	check(err)
-	defer db.Close()
-
 	statement := `UPDATE rooms SET beingserved = $1 WHERE roomid = $2;`
 	_, err = db.Exec(statement, false, roomCookie.Value)
 	check(err)

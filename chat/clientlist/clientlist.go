@@ -69,39 +69,36 @@ func ClientListHandler(w http.ResponseWriter, r *http.Request) {
 
 	t, err := template.ParseFiles("views/base.gohtml", "views/clientlist.gohtml")
 	check(err)
-	// t.ExecuteTemplate(w, "base", nil)
-	if r.Method != http.MethodPost {
-		t.ExecuteTemplate(w, "base", nil)
-		return
-	}
 
 	sessionCookie, err := r.Cookie("SessionCookie")
 	if err != nil {
 		check(err)
 		return
 	}
+	fmt.Println(sessionCookie)
 
 	db, err := sql.Open(config.DBType, config.DBconfig)
 	check(err)
 	defer db.Close()
 
-	statement := `SELECT username, organisation FROM users WHERE email='(SELECT email FROM sessions WHERE cookie=$1)';`
-	row := db.QueryRow(statement, sessionCookie)
+	statement := `SELECT email FROM sessions WHERE cookie=$1;`
+	row := db.QueryRow(statement, sessionCookie.Value)
+	var email string
+	switch err := row.Scan(&email); err {
+	case sql.ErrNoRows:
+		fmt.Println("No row found.")
+	case nil:
+		fmt.Println(email)
+	default:
+		check(err)
+	}
+
+	statement = `SELECT username, organisation FROM users WHERE email=$1;`
+	row = db.QueryRow(statement, email)
 	var username string
 	var organisation string
 	row.Scan(&username, &organisation)
-
-	// roomid := r.FormValue("roomid")
-	// cookie1 := http.Cookie{
-	// 	Name:  "clientroom", // Set to roomid
-	// 	Value: roomid,
-	// 	// Expires:  time.Now().Add(time.Hour),
-	// 	HttpOnly: true,
-	// 	// Secure:   true,
-	// 	// MaxAge:   50000,
-	// 	Path: "/",
-	// }
-	// http.SetCookie(w, &cookie1)
+	fmt.Println(username, organisation)
 
 	consultantName := http.Cookie{
 		Name:  "consultantName",
@@ -124,6 +121,7 @@ func ClientListHandler(w http.ResponseWriter, r *http.Request) {
 		Path: "/",
 	}
 	http.SetCookie(w, &consultantCookie)
+	t.ExecuteTemplate(w, "base", nil)
 }
 
 type notBeingServed struct {
