@@ -2,7 +2,7 @@ package models
 
 import (
 	"database/sql"
-	"log"
+	"fmt"
 
 	"github.com/alexalexyang/hayat/config"
 	_ "github.com/lib/pq"
@@ -10,7 +10,7 @@ import (
 
 func check(err error) {
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 }
 
@@ -25,20 +25,12 @@ func DBSetup() {
 				timestamptz TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 				roomid TEXT UNIQUE,
 				organisation TEXT,
-				sessioncookie TEXT UNIQUE,
+				username TEXT,
+				age TEXT,
+				gender TEXT,
+				issues TEXT,
 				beingserved bool
 				);`
-	_, err = db.Exec(statement)
-	check(err)
-
-	// Anteroom table.
-	statement = `CREATE TABLE IF NOT EXISTS clientprofiles (
-		sessioncookie TEXT UNIQUE,
-		username TEXT,
-		age TEXT,
-		gender TEXT,
-		issues TEXT
-		);`
 	_, err = db.Exec(statement)
 	check(err)
 
@@ -49,8 +41,7 @@ func DBSetup() {
 		username TEXT UNIQUE,
 		email TEXT UNIQUE,
 		password TEXT UNIQUE,
-		organisation TEXT,
-		sessioncookie TEXT UNIQUE
+		organisation TEXT
 		);`
 	_, err = db.Exec(statement)
 	check(err)

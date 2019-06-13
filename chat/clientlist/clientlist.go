@@ -5,18 +5,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"time"
 
 	"github.com/alexalexyang/hayat/config"
+	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/lib/pq"
 )
 
 func check(err error) {
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 }
 
@@ -55,11 +55,12 @@ func waitForNotification(l *pq.Listener, ws *websocket.Conn) {
 			ws.WriteJSON(payload)
 		case <-time.After(120 * time.Second):
 			fmt.Println("Received no events for 120 seconds, checking connection")
-			fmt.Println("Counter:", counter)
-			counter += 1
-			go func() {
-				l.Ping()
-			}()
+			l.Ping()
+			fmt.Println(counter)
+			counter++
+			// go func() {
+			// 	l.Ping()
+			// }()
 		}
 	}
 }
@@ -74,28 +75,55 @@ func ClientListHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	roomid := r.FormValue("roomid")
-	cookie1 := http.Cookie{
-		Name:  "clientroom", // Set to roomid
-		Value: roomid,
-		// Expires:  time.Now().Add(time.Hour),
-		HttpOnly: true,
-		// Secure:   true,
-		// MaxAge:   50000,
-		Path: "/",
+	sessionCookie, err := r.Cookie("SessionCookie")
+	if err != nil {
+		check(err)
+		return
 	}
-	http.SetCookie(w, &cookie1)
 
-	cookie2 := http.Cookie{
-		Name:  "consultant",
-		Value: "consultant",
+	db, err := sql.Open(config.DBType, config.DBconfig)
+	check(err)
+	defer db.Close()
+
+	statement := `SELECT username, organisation FROM users WHERE email='(SELECT email FROM sessions WHERE cookie=$1)';`
+	row := db.QueryRow(statement, sessionCookie)
+	var username string
+	var organisation string
+	row.Scan(&username, &organisation)
+
+	// roomid := r.FormValue("roomid")
+	// cookie1 := http.Cookie{
+	// 	Name:  "clientroom", // Set to roomid
+	// 	Value: roomid,
+	// 	// Expires:  time.Now().Add(time.Hour),
+	// 	HttpOnly: true,
+	// 	// Secure:   true,
+	// 	// MaxAge:   50000,
+	// 	Path: "/",
+	// }
+	// http.SetCookie(w, &cookie1)
+
+	consultantName := http.Cookie{
+		Name:  "consultantName",
+		Value: username,
 		// Expires:  time.Now().Add(time.Hour),
 		HttpOnly: true,
 		// Secure:   true,
 		// MaxAge:   50000,
 		Path: "/",
 	}
-	http.SetCookie(w, &cookie2)
+	http.SetCookie(w, &consultantName)
+
+	consultantCookie := http.Cookie{
+		Name:  "consultant",
+		Value: organisation,
+		// Expires:  time.Now().Add(time.Hour),
+		HttpOnly: true,
+		// Secure:   true,
+		// MaxAge:   50000,
+		Path: "/",
+	}
+	http.SetCookie(w, &consultantCookie)
 }
 
 type notBeingServed struct {
@@ -104,14 +132,19 @@ type notBeingServed struct {
 }
 
 func ClientListWSHandler(w http.ResponseWriter, r *http.Request) {
-
+	consultantCookie, err := r.Cookie("consultant")
+	if err != nil {
+		check(err)
+		return
+	}
+	organisation := consultantCookie.Value
 	db, err := sql.Open(config.DBType, config.DBconfig)
 	check(err)
 	defer db.Close()
 
 	// Find by organisation too.
-	statement := `SELECT roomid FROM rooms WHERE beingserved = 'f';`
-	rows, err := db.Query(statement)
+	statement := `SELECT roomid FROM rooms WHERE beingserved='f' AND organisation=$1;`
+	rows, err := db.Query(statement, organisation)
 	check(err)
 	defer rows.Close()
 
@@ -134,12 +167,35 @@ func ClientListWSHandler(w http.ResponseWriter, r *http.Request) {
 	Listen(ws)
 }
 
-func DashboardHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("views/base.gohtml", "views/dashboard.gohtml")
-	check(err)
-	// t.ExecuteTemplate(w, "base", nil)
-	if r.Method != http.MethodPost {
-		t.ExecuteTemplate(w, "base", nil)
+func ClientProfileHandler(w http.ResponseWriter, r *http.Request) {
+	_, err := r.Cookie("consultant")
+	if err != nil {
+		check(err)
 		return
 	}
+	t, err := template.ParseFiles("views/base.gohtml", "views/clientprofile.gohtml")
+	check(err)
+
+	params := mux.Vars(r)
+	urlid := params["id"]
+	fmt.Println(urlid)
+
+	db, err := sql.Open(config.DBType, config.DBconfig)
+	check(err)
+	defer db.Close()
+
+	clientProfile := struct {
+		Username     string
+		Age          string
+		Gender       string
+		Issues       string
+		Roomid       string
+		Organisation string
+	}{}
+
+	statement := `SELECT username, age, gender, issues, roomid, organisation FROM rooms WHERE roomid=$1;`
+	row := db.QueryRow(statement, urlid)
+	row.Scan(&clientProfile.Username, &clientProfile.Age, &clientProfile.Gender, &clientProfile.Issues, &clientProfile.Roomid, &clientProfile.Organisation)
+
+	t.ExecuteTemplate(w, "base", clientProfile)
 }

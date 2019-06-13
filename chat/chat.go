@@ -18,7 +18,7 @@ import (
 
 func check(err error) {
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 }
 
@@ -67,7 +67,7 @@ func decoder(encodedValue string) string {
 	return cookieValue
 }
 
-func cookieSetter(w http.ResponseWriter, cookieName string, encodedValue string) {
+func cookieSetter(w http.ResponseWriter, cookieName string, encodedValue string, roomPath string) {
 	cookie := http.Cookie{
 		Name:  cookieName,
 		Value: encodedValue,
@@ -75,7 +75,7 @@ func cookieSetter(w http.ResponseWriter, cookieName string, encodedValue string)
 		HttpOnly: true,
 		// Secure:   true,
 		// MaxAge:   50000,
-		Path: "/",
+		Path: roomPath,
 	}
 	http.SetCookie(w, &cookie)
 }
@@ -90,11 +90,6 @@ func AnteroomHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// This is the unique ID for the client.
-	rawCookieValue := uuid.Must(uuid.NewV4()).String()
-	encodedValue := encoder(rawCookieValue)
-	cookieSetter(w, "hayatclient", encodedValue)
-
 	username := r.FormValue("username")
 	age, _ := strconv.Atoi(r.FormValue("age"))
 	gender := r.FormValue("gender")
@@ -103,25 +98,17 @@ func AnteroomHandler(w http.ResponseWriter, r *http.Request) {
 	// Token is used to identify which customer the client goes to.
 	token := r.FormValue("token")
 
-	// chatroomID is used to list the room in the clientlist.
 	roomID := uuid.Must(uuid.NewV4()).String()
-	// idslice := roomID[:8]
-	// cookieSetter(w, "clientroom-"+idslice, roomID)
-	cookieSetter(w, "clientroom", roomID)
+	cookieSetter(w, "clientroom", roomID, "/chatclientws/"+roomID)
 
 	// Add anteroomValues to db.
 	db, err := sql.Open(config.DBType, config.DBconfig)
 	check(err)
 	defer db.Close()
 
-	statement := `INSERT INTO clientprofiles (sessioncookie, username, age, gender, issues)
-	VALUES ($1, $2, $3, $4, $5)`
-	_, err = db.Exec(statement, rawCookieValue, username, age, gender, issues)
-	check(err)
-
-	statement = `INSERT INTO rooms (roomid, organisation, sessioncookie)
-				VALUES ($1, $2, $3);`
-	_, err = db.Exec(statement, roomID, token, rawCookieValue)
+	statement := `INSERT INTO rooms (roomid, organisation, username, age, gender, issues)
+				VALUES ($1, $2, $3, $4, $5, $6);`
+	_, err = db.Exec(statement, roomID, token, username, age, gender, issues)
 	check(err)
 
 	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/chatclient/"+roomID, http.StatusSeeOther)
@@ -144,9 +131,10 @@ func ChatRoomMaker(chatroomID string, ws *websocket.Conn) map[*websocket.Conn]bo
 }
 
 func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
+
 	params := mux.Vars(r)
 	urlid := params["id"]
-	fmt.Println(urlid)
+
 	cookies := r.Cookies()
 	cookieMap := make(map[string]string)
 	for _, cookie := range cookies {
@@ -154,33 +142,27 @@ func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(cookieMap[cookie.Name])
 	}
 
-	var roomIDString string
-	for k, _ := range cookieMap {
-		if _, ok := roomsRegistry[k]; ok {
-			if len(roomsRegistry[k].Clients) == 1 {
-				roomIDString = k
-			}
-		}
-	}
+	// var roomIDString string
+	// for k, _ := range cookieMap {
+	// 	if _, ok := roomsRegistry[k]; ok {
+	// 		if len(roomsRegistry[k].Clients) == 1 {
+	// 			roomIDString = k
+	// 		}
+	// 	}
+	// }
 
 	if _, ok := cookieMap["consultant"]; ok {
-		roomID := cookieMap[roomIDString]
-		if _, ok := roomsRegistry[roomID]; ok {
-			room := roomsRegistry[roomID]
+		if _, ok := roomsRegistry[urlid]; ok {
+			room := roomsRegistry[urlid]
 
 			ws, err := upgrader.Upgrade(w, r, nil)
 			check(err)
 			defer ws.Close()
 			room.Clients[ws] = true
 
-			chatBroker(room.Clients, ws, "consultant")
+			chatBroker(room.Clients, ws, cookieMap["consultantName"])
 		}
 	}
-
-	cookie, err := r.Cookie("hayatclient")
-	encodedValue := cookie.Value
-	check(err)
-	cookieValue := decoder(encodedValue)
 
 	roomCookie, err := r.Cookie("clientroom")
 
@@ -196,13 +178,13 @@ func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
 	check(err)
 	defer db.Close()
 
-	statement := `UPDATE rooms SET beingserved = $1 WHERE sessioncookie = $2;`
-	_, err = db.Exec(statement, false, cookieValue)
+	statement := `UPDATE rooms SET beingserved = $1 WHERE roomid = $2;`
+	_, err = db.Exec(statement, false, roomCookie.Value)
 	check(err)
 
 	// Use cookie to get client's name from their profile.
-	statement = `SELECT username from clientprofiles WHERE sessioncookie = $1;`
-	row := db.QueryRow(statement, cookieValue)
+	statement = `SELECT username from rooms WHERE roomid = $1;`
+	row := db.QueryRow(statement, roomCookie.Value)
 	var username string
 	row.Scan(&username)
 	// check(err)

@@ -96,8 +96,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusResetContent)
 		return
 	}
+
 	// Redirect to dashboard.
-	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/anteroom", http.StatusSeeOther)
+	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/clientlist", http.StatusSeeOther)
 }
 
 func RegisterOrgHandler(w http.ResponseWriter, r *http.Request) {

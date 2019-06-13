@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -15,13 +16,12 @@ import (
 
 func check(err error) {
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 }
 
 func main() {
 	models.DBSetup()
-	// go clientlist.Listen()
 	log.Println("http server started on", config.Port)
 	log.Fatal(http.ListenAndServe(config.Port, initRouter()))
 }
@@ -35,10 +35,10 @@ func initRouter() *mux.Router {
 	router.HandleFunc("/chatclientws/{id:[\\w\\-]+}", chat.ChatClientWSHandler)
 	router.HandleFunc("/chatclient/{id:[\\w\\-]+}", chat.ChatClientHandler)
 
-	router.HandleFunc("/dashboard", clientlist.DashboardHandler)
 	// Clientlist
 	router.HandleFunc("/clientlistws", clientlist.ClientListWSHandler)
 	router.HandleFunc("/clientlist", clientlist.ClientListHandler)
+	router.HandleFunc("/clientprofile/{id:[\\w\\-]+}", clientlist.ClientProfileHandler)
 
 	// Auth
 	router.HandleFunc("/register/org", auth.RegisterOrgHandler)

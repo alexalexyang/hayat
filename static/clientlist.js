@@ -14,11 +14,11 @@ window.onload = function() {
 
 
     submitter = function(roomid) {
-        console.log("submitting: " + roomid);
-        document.clientlistForm.inputRoom.value = roomid;
-        document.getElementById('clientlistForm').submit();
-        var chat_id = "chat_" + roomid
-        document.getElementById(chat_id).style = "display: block";
+        // console.log("submitting: " + roomid);
+        // document.clientlistForm.inputRoom.value = roomid;
+        // document.getElementById('clientlistForm').submit();
+        // var chat_id = "chat_" + roomid
+        // document.getElementById(chat_id).style = "display: block";
     };
 
     socket.onmessage = function(event) {
@@ -29,7 +29,7 @@ window.onload = function() {
             if (msg[i].beingserved == false) {
                 var roomid = msg[i].roomid
                     // chats.innerHTML += `<ul id="chat_${roomid}" name="${roomid}" style="display: none;"><iframe id=${roomid} name="${roomid}"></iframe></br></ul>`;
-                listRooms.innerHTML += `<li id=${roomid} onclick="submitter('${roomid}')"><a target="_blank" href="http://localhost:8000/chatclient/${roomid}">${roomid}</a></li>`;
+                listRooms.innerHTML += `<li id=${roomid} onclick="submitter('${roomid}')"><a target="_blank" href="http://localhost:8000/clientprofile/${roomid}">${roomid}</a></li>`;
             } else {
                 document.getElementById(msg[i].roomid).remove();
             };

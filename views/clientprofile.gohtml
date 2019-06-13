@@ -1,0 +1,20 @@
+{{define "yield"}}
+	<h1>
+		Client profile
+	</h1>
+
+	<h2>Username</h2>
+	<p>{{.Username}}</p>
+
+	<h2>Age</h2>
+	<p>{{.Age}}</p>
+
+	<h2>Gender</h2>
+	<p>{{.Gender}}</p>
+
+	<h2>Issues</h2>
+	<p>{{.Issues}}</p>
+
+	<p><a href="http://localhost:8000/chatclient/{{.Roomid}}">Chat now.</p>
+
+{{end}}
