@@ -29,7 +29,8 @@ func DBSetup() {
 				age TEXT,
 				gender TEXT,
 				issues TEXT,
-				beingserved bool
+				beingserved bool,
+				emptysince TEXT
 				);`
 	_, err = db.Exec(statement)
 	check(err)

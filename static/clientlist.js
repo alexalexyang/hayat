@@ -2,6 +2,7 @@ window.onload = function() {
     var listRooms = document.getElementById('room');
     var inputRoom = document.getElementById('inputRoom');
     var chats = document.getElementById('chat');
+    var tabs = document.getElementById('tab');
     var socket = new WebSocket('ws://localhost:8000/clientlistws');
 
     socket.onopen = function(event) {
@@ -16,7 +17,36 @@ window.onload = function() {
     submitter = function(roomid) {
         document.clientlistForm.inputRoom.value = roomid;
         document.getElementById('clientlistForm').submit();
+        tabs.innerHTML += `<li><a onclick="channel('${roomid}')">Tab</a></li>`;
     };
+
+
+
+
+    getElementByClass = function(classer) {
+        var allHTMLTags = document.getElementsByTagName("*");
+        console.log(allHTMLTags)
+        var array = [];
+        for (i = 0; i < allHTMLTags.length; i++) {
+            if (allHTMLTags[i].className == classer) {
+                array.push(allHTMLTags[i]);
+            }
+        }
+        return array;
+    }
+
+    channel = function(roomid) {
+        // var frames = getElementByClass("ChannelView");
+        var frames = document.getElementsByClassName("ChannelView");
+        var length = frames.length;
+        for (var i = 0; i < length; i++) {
+            if (frames[i].id == ("viewer" + roomid)) {
+                frames[i].style.display = "inline";
+            } else { frames[i].style.display = "none"; }
+        }
+    }
+
+
 
     socket.onmessage = function(event) {
         var msg = JSON.parse(event.data);
@@ -25,8 +55,12 @@ window.onload = function() {
         for (let i = 0; i < msg.length; i++) {
             if (msg[i].beingserved == false) {
                 var roomid = msg[i].roomid
-                    // chats.innerHTML += `<ul id="chat_${roomid}" name="${roomid}" style="display: none;"><iframe id=${roomid} name="${roomid}"></iframe></br></ul>`;
-                listRooms.innerHTML += `<li id=${roomid} onclick="submitter('${roomid}')"><a target="_blank" href="http://localhost:8000/clientprofile/${roomid}">${roomid}</a></li>`;
+                chats.innerHTML += `<ul id="menu">
+                                        <iframe name="${roomid}" frameborder=0 id="viewer${roomid}" class="ChannelView" style="display:none"></iframe>
+                                    </ul>`;
+
+
+                listRooms.innerHTML += `<li id=${roomid} onclick="submitter('${roomid}')"><a target="${roomid}" href="http://localhost:8000/clientprofile/${roomid}">${roomid}</a></li>`;
             } else {
                 document.getElementById(msg[i].roomid).remove();
             };

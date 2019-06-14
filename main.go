@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/alexalexyang/hayat/auth"
 
@@ -21,22 +20,9 @@ func check(err error) {
 	}
 }
 
-// Deletes rooms from the room registry if they've been empty for an hour.
-func cleanUpRooms() {
-	for {
-		for room, _ := range chat.RoomsRegistry {
-			if len(chat.RoomsRegistry[room].Clients) == 0 {
-				if time.Since(chat.RoomsRegistry[room].EmptySince).Seconds() > 3600*time.Second.Seconds() {
-					delete(chat.RoomsRegistry, room)
-				}
-			}
-		}
-		time.Sleep(3600 * time.Second)
-	}
-}
-
 func main() {
-	go cleanUpRooms()
+	// Rebuild()
+	// go chat.RoomsRegistry.CleanUpRooms()
 	models.DBSetup()
 	log.Println("http server started on", config.Port)
 	http.ListenAndServe(config.Port, initRouter())

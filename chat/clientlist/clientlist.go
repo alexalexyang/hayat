@@ -75,7 +75,8 @@ func waitForNotification(l *pq.Listener, ws *websocket.Conn, organisation string
 }
 
 func ClientListHandler(w http.ResponseWriter, r *http.Request) {
-
+	var username string
+	var organisation string
 	if r.Method != http.MethodPost {
 		t, err := template.ParseFiles("views/base.gohtml", "views/clientlist.gohtml")
 		check(err)
@@ -104,8 +105,6 @@ func ClientListHandler(w http.ResponseWriter, r *http.Request) {
 
 		statement = `SELECT username, organisation FROM users WHERE email=$1;`
 		row = db.QueryRow(statement, email)
-		var username string
-		var organisation string
 		row.Scan(&username, &organisation)
 
 		consultantName := http.Cookie{
@@ -139,6 +138,11 @@ func ClientListHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(roomid)
 	statement := `UPDATE rooms SET beingserved = $1 WHERE roomid = $2;`
 	_, err = db.Exec(statement, true, roomid)
+	check(err)
+
+	statement = `INSERT INTO rooms (roomid, organisation, username)
+				VALUES ($1, $2, $3);`
+	_, err = db.Exec(statement, roomid, organisation, username)
 	check(err)
 }
 
