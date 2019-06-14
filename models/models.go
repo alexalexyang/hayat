@@ -34,30 +34,30 @@ func DBSetup() {
 	_, err = db.Exec(statement)
 	check(err)
 
-	// Customer table.
-	statement = `CREATE TABLE IF NOT EXISTS consultants (
-		firstname TEXT,
-		lastname TEXT,
-		username TEXT UNIQUE,
-		email TEXT UNIQUE,
-		password TEXT UNIQUE,
-		organisation TEXT
-		);`
-	_, err = db.Exec(statement)
-	check(err)
+	// // Customer table.
+	// statement = `CREATE TABLE IF NOT EXISTS consultants (
+	// 	firstname TEXT,
+	// 	lastname TEXT,
+	// 	username TEXT UNIQUE,
+	// 	email TEXT UNIQUE,
+	// 	password TEXT UNIQUE,
+	// 	organisation TEXT
+	// 	);`
+	// _, err = db.Exec(statement)
+	// check(err)
 
-	// Organisation table.
-	statement = `CREATE TABLE IF NOT EXISTS organisations (
-		id SERIAL UNIQUE,
-		orgname TEXT,
-		phone TEXT UNIQUE,
-		email TEXT UNIQUE,
-		managername TEXT UNIQUE,
-		password TEXT UNIQUE,
-		organisation TEXT
-		);`
-	_, err = db.Exec(statement)
-	check(err)
+	// // Organisation table.
+	// statement = `CREATE TABLE IF NOT EXISTS organisations (
+	// 	id SERIAL UNIQUE,
+	// 	orgname TEXT,
+	// 	phone TEXT UNIQUE,
+	// 	email TEXT UNIQUE,
+	// 	managername TEXT UNIQUE,
+	// 	password TEXT UNIQUE,
+	// 	organisation TEXT
+	// 	);`
+	// _, err = db.Exec(statement)
+	// check(err)
 
 	statement = `CREATE OR REPLACE FUNCTION notify_event() RETURNS TRIGGER AS $$
     
@@ -67,7 +67,8 @@ func DBSetup() {
 		with payload(roomid, beingserved) as
 		(
 		  select NEW.roomid,
-				 NEW.beingserved
+				 NEW.beingserved,
+				 NEW.organisation
 		)
 		select pg_notify('events', row_to_json(payload)::text)
 		  from payload

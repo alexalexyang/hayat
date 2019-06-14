@@ -67,7 +67,7 @@ func decoder(encodedValue string) string {
 	return cookieValue
 }
 
-func cookieSetter(w http.ResponseWriter, cookieName string, encodedValue string, roomPath string) {
+func CookieSetter(w http.ResponseWriter, cookieName string, encodedValue string, roomPath string) {
 	cookie := http.Cookie{
 		Name:  cookieName,
 		Value: encodedValue,
@@ -99,16 +99,16 @@ func AnteroomHandler(w http.ResponseWriter, r *http.Request) {
 	token := r.FormValue("token")
 
 	roomID := uuid.Must(uuid.NewV4()).String()
-	cookieSetter(w, "clientroom", roomID, "/chatclientws/"+roomID)
+	CookieSetter(w, "clientroom", roomID, "/chatclientws/"+roomID)
 
 	// Add anteroomValues to db.
 	db, err := sql.Open(config.DBType, config.DBconfig)
 	check(err)
 	defer db.Close()
 
-	statement := `INSERT INTO rooms (roomid, organisation, username, age, gender, issues)
-				VALUES ($1, $2, $3, $4, $5, $6);`
-	_, err = db.Exec(statement, roomID, token, username, age, gender, issues)
+	statement := `INSERT INTO rooms (roomid, organisation, username, age, gender, issues, beingserved)
+				VALUES ($1, $2, $3, $4, $5, $6, $7);`
+	_, err = db.Exec(statement, roomID, token, username, age, gender, issues, false)
 	check(err)
 
 	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/chatclient/"+roomID, http.StatusSeeOther)
@@ -131,10 +131,6 @@ func ChatRoomMaker(chatroomID string, ws *websocket.Conn) map[*websocket.Conn]bo
 }
 
 func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open(config.DBType, config.DBconfig)
-	check(err)
-	defer db.Close()
-
 	params := mux.Vars(r)
 	urlid := params["id"]
 
@@ -142,7 +138,6 @@ func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
 	cookieMap := make(map[string]string)
 	for _, cookie := range cookies {
 		cookieMap[cookie.Name] = cookie.Value
-		fmt.Println(cookieMap[cookie.Name])
 	}
 
 	if _, ok := cookieMap["consultant"]; ok {
@@ -154,34 +149,38 @@ func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
 			defer ws.Close()
 			room.Clients[ws] = true
 
-			statement := `UPDATE rooms SET beingserved = $1 WHERE roomid = $2;`
-			_, err = db.Exec(statement, true, urlid)
-			check(err)
-
 			chatBroker(room.Clients, ws, cookieMap["consultantName"])
 		}
+		return
 	}
-
-	roomCookie, err := r.Cookie("clientroom")
 
 	ws, err := upgrader.Upgrade(w, r, nil)
 	check(err)
 	defer ws.Close()
 
-	// Create a chatroom.
-	clients := ChatRoomMaker(roomCookie.Value, ws)
+	db, err := sql.Open(config.DBType, config.DBconfig)
+	check(err)
+	defer db.Close()
 
-	// Use cookie to update client room details.
-	statement := `UPDATE rooms SET beingserved = $1 WHERE roomid = $2;`
-	_, err = db.Exec(statement, false, roomCookie.Value)
+	roomCookie, err := r.Cookie("clientroom")
 	check(err)
 
 	// Use cookie to get client's name from their profile.
-	statement = `SELECT username from rooms WHERE roomid = $1;`
+	statement := `SELECT username from rooms WHERE roomid = $1;`
 	row := db.QueryRow(statement, roomCookie.Value)
 	var username string
 	row.Scan(&username)
-	// check(err)
+
+	// Check if user was already in a room and just reconnecting now.
+	if room, ok := roomsRegistry[roomCookie.Value]; ok {
+		fmt.Println("Reconnecting.")
+		room.Clients[ws] = true
+		chatBroker(room.Clients, ws, username)
+		return
+	}
+
+	// Create a chatroom.
+	clients := ChatRoomMaker(roomCookie.Value, ws)
 
 	chatBroker(clients, ws, username)
 }

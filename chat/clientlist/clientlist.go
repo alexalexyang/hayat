@@ -20,6 +20,12 @@ func check(err error) {
 	}
 }
 
+type notBeingServed struct {
+	Roomid       string `json:"roomid"`
+	Beingserved  bool   `json:"beingserved"`
+	Organisation string `json:"organisation"`
+}
+
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -28,7 +34,7 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func Listen(ws *websocket.Conn) {
+func Listen(ws *websocket.Conn, organisation string) {
 	reportProblem := func(ev pq.ListenerEventType, err error) {
 		check(err)
 	}
@@ -39,11 +45,11 @@ func Listen(ws *websocket.Conn) {
 
 	fmt.Println("Start monitoring PostgreSQL...")
 	for {
-		waitForNotification(listener, ws)
+		waitForNotification(listener, ws, organisation)
 	}
 }
 
-func waitForNotification(l *pq.Listener, ws *websocket.Conn) {
+func waitForNotification(l *pq.Listener, ws *websocket.Conn, organisation string) {
 	counter := 0
 	for {
 		select {
@@ -51,6 +57,9 @@ func waitForNotification(l *pq.Listener, ws *websocket.Conn) {
 			// fmt.Println("Received data from channel [", n.Channel, "] :")
 			data := notBeingServed{}
 			_ = json.Unmarshal([]byte(n.Extra), &data)
+			if organisation != data.Organisation {
+				return
+			}
 			payload := []notBeingServed{data}
 			ws.WriteJSON(payload)
 		case <-time.After(120 * time.Second):
@@ -67,66 +76,70 @@ func waitForNotification(l *pq.Listener, ws *websocket.Conn) {
 
 func ClientListHandler(w http.ResponseWriter, r *http.Request) {
 
-	t, err := template.ParseFiles("views/base.gohtml", "views/clientlist.gohtml")
-	check(err)
-
-	sessionCookie, err := r.Cookie("SessionCookie")
-	if err != nil {
+	if r.Method != http.MethodPost {
+		t, err := template.ParseFiles("views/base.gohtml", "views/clientlist.gohtml")
 		check(err)
-		return
-	}
-	fmt.Println(sessionCookie)
 
+		sessionCookie, err := r.Cookie("SessionCookie")
+		if err != nil {
+			check(err)
+			return
+		}
+
+		db, err := sql.Open(config.DBType, config.DBconfig)
+		check(err)
+		defer db.Close()
+
+		statement := `SELECT email FROM sessions WHERE cookie=$1;`
+		row := db.QueryRow(statement, sessionCookie.Value)
+		var email string
+		switch err := row.Scan(&email); err {
+		case sql.ErrNoRows:
+			fmt.Println("No row found.")
+		case nil:
+			fmt.Println(email)
+		default:
+			check(err)
+		}
+
+		statement = `SELECT username, organisation FROM users WHERE email=$1;`
+		row = db.QueryRow(statement, email)
+		var username string
+		var organisation string
+		row.Scan(&username, &organisation)
+
+		consultantName := http.Cookie{
+			Name:  "consultantName",
+			Value: username,
+			// Expires:  time.Now().Add(time.Hour),
+			HttpOnly: true,
+			// Secure:   true,
+			// MaxAge:   50000,
+			Path: "/",
+		}
+		http.SetCookie(w, &consultantName)
+
+		consultantCookie := http.Cookie{
+			Name:  "consultant",
+			Value: organisation,
+			// Expires:  time.Now().Add(time.Hour),
+			HttpOnly: true,
+			// Secure:   true,
+			// MaxAge:   50000,
+			Path: "/",
+		}
+		http.SetCookie(w, &consultantCookie)
+		t.ExecuteTemplate(w, "base", nil)
+	}
+
+	roomid := r.FormValue("roomid")
 	db, err := sql.Open(config.DBType, config.DBconfig)
 	check(err)
 	defer db.Close()
-
-	statement := `SELECT email FROM sessions WHERE cookie=$1;`
-	row := db.QueryRow(statement, sessionCookie.Value)
-	var email string
-	switch err := row.Scan(&email); err {
-	case sql.ErrNoRows:
-		fmt.Println("No row found.")
-	case nil:
-		fmt.Println(email)
-	default:
-		check(err)
-	}
-
-	statement = `SELECT username, organisation FROM users WHERE email=$1;`
-	row = db.QueryRow(statement, email)
-	var username string
-	var organisation string
-	row.Scan(&username, &organisation)
-	fmt.Println(username, organisation)
-
-	consultantName := http.Cookie{
-		Name:  "consultantName",
-		Value: username,
-		// Expires:  time.Now().Add(time.Hour),
-		HttpOnly: true,
-		// Secure:   true,
-		// MaxAge:   50000,
-		Path: "/",
-	}
-	http.SetCookie(w, &consultantName)
-
-	consultantCookie := http.Cookie{
-		Name:  "consultant",
-		Value: organisation,
-		// Expires:  time.Now().Add(time.Hour),
-		HttpOnly: true,
-		// Secure:   true,
-		// MaxAge:   50000,
-		Path: "/",
-	}
-	http.SetCookie(w, &consultantCookie)
-	t.ExecuteTemplate(w, "base", nil)
-}
-
-type notBeingServed struct {
-	Roomid      string `json:"roomid"`
-	Beingserved bool   `json:"beingserved"`
+	fmt.Println(roomid)
+	statement := `UPDATE rooms SET beingserved = $1 WHERE roomid = $2;`
+	_, err = db.Exec(statement, true, roomid)
+	check(err)
 }
 
 func ClientListWSHandler(w http.ResponseWriter, r *http.Request) {
@@ -162,7 +175,7 @@ func ClientListWSHandler(w http.ResponseWriter, r *http.Request) {
 
 	ws.WriteJSON(serviceSlice)
 
-	Listen(ws)
+	Listen(ws, organisation)
 }
 
 func ClientProfileHandler(w http.ResponseWriter, r *http.Request) {
@@ -176,7 +189,6 @@ func ClientProfileHandler(w http.ResponseWriter, r *http.Request) {
 
 	params := mux.Vars(r)
 	urlid := params["id"]
-	fmt.Println(urlid)
 
 	db, err := sql.Open(config.DBType, config.DBconfig)
 	check(err)

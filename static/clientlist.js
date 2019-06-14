@@ -14,11 +14,8 @@ window.onload = function() {
 
 
     submitter = function(roomid) {
-        // console.log("submitting: " + roomid);
-        // document.clientlistForm.inputRoom.value = roomid;
-        // document.getElementById('clientlistForm').submit();
-        // var chat_id = "chat_" + roomid
-        // document.getElementById(chat_id).style = "display: block";
+        document.clientlistForm.inputRoom.value = roomid;
+        document.getElementById('clientlistForm').submit();
     };
 
     socket.onmessage = function(event) {
