@@ -2,7 +2,18 @@
 
 This is my attempt to build a chat SAAS.
 
+
+# Todos
+
+- Delete all members and traces of organisation upon deletion of organisation by manager.
+- Save messages so they can be reloaded if connection breaks for whatever reason.
+- Delete saved messages when cleaning up rooms.
+- Prioritise database over in-memory storage for persistence.
+  - esp. for RoomRegistry.
+
+
 # Learning sources
+
 
 ## Listen and notify on row with postgres
 

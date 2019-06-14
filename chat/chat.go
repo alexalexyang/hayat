@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 
@@ -23,7 +24,7 @@ func check(err error) {
 }
 
 // Rooms mapped by room ID to user websockets.
-var roomsRegistry = make(map[string]ChatroomStruct)
+var RoomsRegistry = make(map[string]ChatroomStruct)
 
 type AnteroomStruct struct {
 	username string
@@ -34,8 +35,9 @@ type AnteroomStruct struct {
 }
 
 type ChatroomStruct struct {
-	ID      string
-	Clients map[*websocket.Conn]bool
+	ID         string
+	EmptySince time.Time
+	Clients    map[*websocket.Conn]bool
 }
 
 type Message struct {
@@ -121,13 +123,12 @@ func ChatClientHandler(w http.ResponseWriter, r *http.Request) {
 	t.ExecuteTemplate(w, "base", nil)
 }
 
-func ChatRoomMaker(chatroomID string, ws *websocket.Conn) map[*websocket.Conn]bool {
+func ChatRoomMaker(chatroomID string, ws *websocket.Conn) ChatroomStruct {
 	var Chatroom ChatroomStruct
 	Chatroom.Clients = make(map[*websocket.Conn]bool)
 	Chatroom.Clients[ws] = true
-	clients := Chatroom.Clients
-	roomsRegistry[chatroomID] = Chatroom
-	return clients
+	RoomsRegistry[chatroomID] = Chatroom
+	return Chatroom
 }
 
 func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
@@ -141,15 +142,15 @@ func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, ok := cookieMap["consultant"]; ok {
-		if _, ok := roomsRegistry[urlid]; ok {
-			room := roomsRegistry[urlid]
+		if _, ok := RoomsRegistry[urlid]; ok {
+			room := RoomsRegistry[urlid]
 
 			ws, err := upgrader.Upgrade(w, r, nil)
 			check(err)
 			defer ws.Close()
 			room.Clients[ws] = true
 
-			chatBroker(room.Clients, ws, cookieMap["consultantName"])
+			chatBroker(room, ws, cookieMap["consultantName"])
 		}
 		return
 	}
@@ -172,20 +173,20 @@ func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
 	row.Scan(&username)
 
 	// Check if user was already in a room and just reconnecting now.
-	if room, ok := roomsRegistry[roomCookie.Value]; ok {
+	if room, ok := RoomsRegistry[roomCookie.Value]; ok {
 		fmt.Println("Reconnecting.")
 		room.Clients[ws] = true
-		chatBroker(room.Clients, ws, username)
+		chatBroker(room, ws, username)
 		return
 	}
 
 	// Create a chatroom.
-	clients := ChatRoomMaker(roomCookie.Value, ws)
+	chatroom := ChatRoomMaker(roomCookie.Value, ws)
 
-	chatBroker(clients, ws, username)
+	chatBroker(chatroom, ws, username)
 }
 
-func chatBroker(clients map[*websocket.Conn]bool, ws *websocket.Conn, username string) {
+func chatBroker(room ChatroomStruct, ws *websocket.Conn, username string) {
 	var msg Message
 	msg.Username = username
 	for {
@@ -193,16 +194,26 @@ func chatBroker(clients map[*websocket.Conn]bool, ws *websocket.Conn, username s
 		err := ws.ReadJSON(&msg)
 		if err != nil {
 			log.Printf("error: %v", err)
-			delete(clients, ws)
+			delete(room.Clients, ws)
+
+			// Set EmptySince to time.Now() so that cleanUpRooms() can delete the room in a couple of hours.
+			if len(room.Clients) == 0 {
+				room.EmptySince = time.Now()
+				RoomsRegistry[room.ID] = room
+			}
 			break
 		}
 		// Send the newly received message to the broadcast channel
-		for client := range clients {
+		for client := range room.Clients {
 			err := client.WriteJSON(msg)
 			if err != nil {
 				log.Printf("error: %v", err)
 				client.Close()
-				delete(clients, client)
+				delete(room.Clients, client)
+				if len(room.Clients) == 0 {
+					room.EmptySince = time.Now()
+					RoomsRegistry[room.ID] = room
+				}
 			}
 		}
 	}
