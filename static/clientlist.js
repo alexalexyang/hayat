@@ -13,30 +13,13 @@ window.onload = function() {
         console.log('WebSocket error: ' + error);
     };
 
-
     submitter = function(roomid) {
         document.clientlistForm.inputRoom.value = roomid;
         document.getElementById('clientlistForm').submit();
         tabs.innerHTML += `<li><a onclick="channel('${roomid}')">Tab</a></li>`;
     };
 
-
-
-
-    getElementByClass = function(classer) {
-        var allHTMLTags = document.getElementsByTagName("*");
-        console.log(allHTMLTags)
-        var array = [];
-        for (i = 0; i < allHTMLTags.length; i++) {
-            if (allHTMLTags[i].className == classer) {
-                array.push(allHTMLTags[i]);
-            }
-        }
-        return array;
-    }
-
     channel = function(roomid) {
-        // var frames = getElementByClass("ChannelView");
         var frames = document.getElementsByClassName("ChannelView");
         var length = frames.length;
         for (var i = 0; i < length; i++) {
@@ -45,8 +28,6 @@ window.onload = function() {
             } else { frames[i].style.display = "none"; }
         }
     }
-
-
 
     socket.onmessage = function(event) {
         var msg = JSON.parse(event.data);
@@ -58,7 +39,6 @@ window.onload = function() {
                 chats.innerHTML += `<ul id="menu">
                                         <iframe name="${roomid}" frameborder=0 id="viewer${roomid}" class="ChannelView" style="display:none"></iframe>
                                     </ul>`;
-
 
                 listRooms.innerHTML += `<li id=${roomid} onclick="submitter('${roomid}')"><a target="${roomid}" href="http://localhost:8000/clientprofile/${roomid}">${roomid}</a></li>`;
             } else {
