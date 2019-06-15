@@ -5,12 +5,14 @@ This is my attempt to build a chat SAAS.
 
 # Todos
 
+- Add button to close chat and remove chat tab.
 - Delete empty rooms after an hour.
 - Rebuild RoomRegistry in case program crashes.
 - Prioritise database over in-memory storage for persistence.
   - esp. for RoomRegistry.
 - Delete all members and traces of organisation upon deletion of organisation by manager.
 - Save messages so they can be reloaded if connection breaks for whatever reason.
+- Reload all messages and chats in case user accidentally reloads page.
 - Delete saved messages when cleaning up rooms.
 
 

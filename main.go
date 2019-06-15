@@ -21,20 +21,25 @@ func check(err error) {
 }
 
 func main() {
-	// Rebuild()
-	// go chat.RoomsRegistry.CleanUpRooms()
+
+	RoomsRegistry := chat.Registry{
+		Rooms: make(map[string]chat.ChatroomStruct),
+	}
+
+	RoomsRegistry.Rebuild()
+	go RoomsRegistry.CleanUpRooms()
 	models.DBSetup()
 	log.Println("http server started on", config.Port)
-	http.ListenAndServe(config.Port, initRouter())
+	http.ListenAndServe(config.Port, initRouter(&RoomsRegistry))
 }
 
-func initRouter() *mux.Router {
+func initRouter(rg *chat.Registry) *mux.Router {
 	router := mux.NewRouter()
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	router.HandleFunc("/anteroom", chat.AnteroomHandler)
 
 	// Chat client
-	router.HandleFunc("/chatclientws/{id:[\\w\\-]+}", chat.ChatClientWSHandler)
+	router.HandleFunc("/chatclientws/{id:[\\w\\-]+}", rg.ChatClientWSHandler)
 	router.HandleFunc("/chatclient/{id:[\\w\\-]+}", chat.ChatClientHandler)
 
 	// Clientlist

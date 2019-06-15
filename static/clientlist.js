@@ -16,7 +16,6 @@ window.onload = function() {
     submitter = function(roomid, username) {
         document.clientlistForm.inputRoom.value = roomid;
         document.getElementById('clientlistForm').submit();
-        // chats.innerHTML + `<iframe name="frame-${roomid}" id="viewer${roomid}" class="ChannelView" style="display:none" src="http://localhost:8000/chatclient/${roomid}"></iframe>`;
         chats.insertAdjacentHTML('beforeend', `<iframe name="frame-${roomid}" id="viewer${roomid}" class="ChannelView" style="display:none" src="http://localhost:8000/clientprofile/${roomid}"></iframe>`);
         tabs.innerHTML += `<li><a onclick="channel('${roomid}')">${username}</a></li>`;
     };

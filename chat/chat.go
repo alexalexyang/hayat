@@ -28,12 +28,6 @@ type Registry struct {
 	Rooms map[string]ChatroomStruct
 }
 
-var RoomsRegistry = Registry{
-	Rooms: make(map[string]ChatroomStruct),
-}
-
-// var RoomsRegistry.Rooms = make(map[string]ChatroomStruct)
-
 type AnteroomStruct struct {
 	username string
 	age      int
@@ -131,15 +125,19 @@ func ChatClientHandler(w http.ResponseWriter, r *http.Request) {
 	t.ExecuteTemplate(w, "base", nil)
 }
 
-func ChatRoomMaker(chatroomID string, ws *websocket.Conn) ChatroomStruct {
+func (rg *Registry) ChatRoomMaker(chatroomID *string, ws *websocket.Conn) ChatroomStruct {
 	var Chatroom ChatroomStruct
 	Chatroom.Clients = make(map[*websocket.Conn]bool)
 	Chatroom.Clients[ws] = true
-	RoomsRegistry.Rooms[chatroomID] = Chatroom
+	rg.Rooms[*chatroomID] = Chatroom
 	return Chatroom
 }
 
-func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
+func (r *Registry) getRoom(roomid string) ChatroomStruct {
+	return r.Rooms[roomid]
+}
+
+func (rg *Registry) ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	urlid := params["id"]
 
@@ -150,15 +148,15 @@ func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, ok := cookieMap["consultant"]; ok {
-		if _, ok := RoomsRegistry.Rooms[urlid]; ok {
-			room := RoomsRegistry.Rooms[urlid]
+		if _, ok := rg.Rooms[urlid]; ok {
+			room := rg.getRoom(urlid)
 
 			ws, err := upgrader.Upgrade(w, r, nil)
 			check(err)
 			defer ws.Close()
 			room.Clients[ws] = true
 
-			chatBroker(room, ws, cookieMap["consultantName"])
+			rg.chatBroker(&room, ws, cookieMap["consultantName"], urlid)
 		}
 		return
 	}
@@ -181,20 +179,21 @@ func ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
 	row.Scan(&username)
 
 	// Check if user was already in a room and just reconnecting now.
-	if room, ok := RoomsRegistry.Rooms[roomCookie.Value]; ok {
+	if _, ok := rg.Rooms[roomCookie.Value]; ok {
+		room := rg.getRoom(urlid)
 		fmt.Println("Reconnecting.")
 		room.Clients[ws] = true
-		chatBroker(room, ws, username)
+		rg.chatBroker(&room, ws, username, roomCookie.Value)
 		return
 	}
 
 	// Create a chatroom.
-	chatroom := ChatRoomMaker(roomCookie.Value, ws)
+	chatroom := rg.ChatRoomMaker(&roomCookie.Value, ws)
 
-	chatBroker(chatroom, ws, username)
+	rg.chatBroker(&chatroom, ws, username, roomCookie.Value)
 }
 
-func chatBroker(room ChatroomStruct, ws *websocket.Conn, username string) {
+func (rg *Registry) chatBroker(room *ChatroomStruct, ws *websocket.Conn, username string, roomid string) {
 	var msg Message
 	msg.Username = username
 	for {
@@ -205,11 +204,14 @@ func chatBroker(room ChatroomStruct, ws *websocket.Conn, username string) {
 			delete(room.Clients, ws)
 
 			// Set EmptySince to time.Now() so that cleanUpRooms() can delete the room in a couple of hours.
-			// if len(room.Clients) == 0 {
-			// 	fmt.Println("Next line is room Emptyslice")
-			// 	fmt.Println(RoomsRegistry.Rooms[room.ID].EmptySince)
-			// 	delete(RoomsRegistry.Rooms, room.ID)
-			// }
+			if len(room.Clients) == 0 {
+				fmt.Println("Next line is room Emptyslice")
+				room.EmptySince = time.Now()
+				rm := rg.Rooms[roomid]
+				rm.EmptySince = time.Now()
+				rg.Rooms[roomid] = rm
+				delete(rg.Rooms, room.ID)
+			}
 			break
 		}
 		// Send the newly received message to the broadcast channel
@@ -219,19 +221,28 @@ func chatBroker(room ChatroomStruct, ws *websocket.Conn, username string) {
 				log.Printf("error: %v", err)
 				client.Close()
 				delete(room.Clients, ws)
-				// if len(room.Clients) == 0 {
-				// 	delete(RoomsRegistry.Rooms, room.ID)
-				// 	fmt.Println("Next line is room Emptyslice")
-				// 	fmt.Println(RoomsRegistry.Rooms[room.ID].EmptySince)
-				// }
+				if len(room.Clients) == 0 {
+					fmt.Println("Next line is room Emptyslice")
+					room.EmptySince = time.Now()
+					rm := rg.Rooms[roomid]
+					rm.EmptySince = time.Now()
+					rg.Rooms[roomid] = rm
+					delete(rg.Rooms, room.ID)
+				}
 				break
 			}
 		}
 	}
 }
 
+func (c *ChatroomStruct) setTime() {
+	c.EmptySince = time.Now()
+	fmt.Println("Time set to:")
+	fmt.Println(c.EmptySince)
+}
+
 // In case program crashes, rebuild RoomsRegistry.Rooms on restart.
-func Rebuild() {
+func (rg *Registry) Rebuild() {
 	db, err := sql.Open(config.DBType, config.DBconfig)
 	check(err)
 	defer db.Close()
@@ -248,47 +259,32 @@ func Rebuild() {
 		room := ChatroomStruct{
 			ID: roomid,
 		}
-		RoomsRegistry.Rooms[roomid] = room
+		rg.Rooms[roomid] = room
 	}
 }
 
 // Deletes rooms from the room registry if they've been empty for an hour.
 func (r *Registry) CleanUpRooms() {
 	for {
-		// for room, _ := range r.Rooms {
-		// 	if len(r.Rooms[room].Clients) == 0 {
-		// 		fmt.Println("Next line is in cleanup")
-		// 		fmt.Println(r.Rooms[room].EmptySince)
-		// 		fmt.Println("Room is: ", room)
-
-		// 		if r.Rooms[room].EmptySince.String() == "0001-01-01 00:00:00 +0000 UTC" {
-		// 			fmt.Println("Wrong time.")
-		// 			continue
-		// 		}
-		// 		if time.Since(r.Rooms[room].EmptySince) > 10.00 {
-		// 			fmt.Println("Right time.")
-		// 			// fmt.Println("Empty room is empty.")
-		// 			delete(r.Rooms, room)
-
-		// 			// db, err := sql.Open(config.DBType, config.DBconfig)
-		// 			// check(err)
-		// 			// defer db.Close()
-
-		// 			// statement := `DELETE FROM rooms WHERE roomid=$1;`
-		// 			// _, err = db.Exec(statement, room)
-		// 			// check(err)
-		// 		}
-		// 	}
-		// }
-		// for k, v := range r.Rooms {
-		// 	fmt.Println(k, v)
-		// }
-		for k, v := range RoomsRegistry.Rooms {
-			fmt.Println(k)
-			fmt.Println(v.EmptySince)
-			fmt.Println("\n")
+		if len(r.Rooms) == 0 {
+			fmt.Println("No rooms.")
 		}
-		time.Sleep(2 * time.Second)
-		// fmt.Println("\n")
+		for room, _ := range r.Rooms {
+			if len(r.Rooms[room].Clients) == 0 {
+				fmt.Println(time.Since(r.Rooms[room].EmptySince).Seconds())
+				fmt.Println("Room is: ", room)
+				if time.Since(r.Rooms[room].EmptySince).Seconds() > 3600.00 {
+					delete(r.Rooms, room)
+
+					db, err := sql.Open(config.DBType, config.DBconfig)
+					check(err)
+					defer db.Close()
+					statement := `DELETE FROM rooms WHERE roomid=$1;`
+					_, err = db.Exec(statement, room)
+					check(err)
+				}
+			}
+		}
+		time.Sleep(4 * time.Second)
 	}
 }
