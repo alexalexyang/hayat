@@ -16,7 +16,8 @@ window.onload = function() {
     var socket = new WebSocket('ws://localhost:8000/chatclientws/' + pathname.split("/")[2]);
 
     socket.onopen = function(event) {
-        socketStatus.innerHTML = 'Connected to: ' + event.currentTarget.url;
+        // socketStatus.innerHTML = 'Connected to: ' + event.currentTarget.url;
+        socketStatus.innerHTML = ''
         console.log(event.currentTarget.url)
         socketStatus.className = 'open';
 

@@ -24,6 +24,7 @@ type notBeingServed struct {
 	Roomid       string `json:"roomid"`
 	Beingserved  bool   `json:"beingserved"`
 	Organisation string `json:"organisation"`
+	Username     string `json:"username"`
 }
 
 var upgrader = websocket.Upgrader{
@@ -32,46 +33,6 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
-}
-
-func Listen(ws *websocket.Conn, organisation string) {
-	reportProblem := func(ev pq.ListenerEventType, err error) {
-		check(err)
-	}
-
-	listener := pq.NewListener(config.DBconfig, 10*time.Second, time.Minute, reportProblem)
-	err := listener.Listen("events")
-	check(err)
-
-	fmt.Println("Start monitoring PostgreSQL...")
-	for {
-		waitForNotification(listener, ws, organisation)
-	}
-}
-
-func waitForNotification(l *pq.Listener, ws *websocket.Conn, organisation string) {
-	counter := 0
-	for {
-		select {
-		case n := <-l.Notify:
-			// fmt.Println("Received data from channel [", n.Channel, "] :")
-			data := notBeingServed{}
-			_ = json.Unmarshal([]byte(n.Extra), &data)
-			if organisation != data.Organisation {
-				return
-			}
-			payload := []notBeingServed{data}
-			ws.WriteJSON(payload)
-		case <-time.After(120 * time.Second):
-			fmt.Println("Received no events for 120 seconds, checking connection")
-			l.Ping()
-			fmt.Println(counter)
-			counter++
-			// go func() {
-			// 	l.Ping()
-			// }()
-		}
-	}
 }
 
 func ClientListHandler(w http.ResponseWriter, r *http.Request) {
@@ -98,7 +59,7 @@ func ClientListHandler(w http.ResponseWriter, r *http.Request) {
 		case sql.ErrNoRows:
 			fmt.Println("No row found.")
 		case nil:
-			fmt.Println(email)
+			// fmt.Println(email)
 		default:
 			check(err)
 		}
@@ -129,13 +90,13 @@ func ClientListHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		http.SetCookie(w, &consultantCookie)
 		t.ExecuteTemplate(w, "base", nil)
+		return
 	}
 
 	roomid := r.FormValue("roomid")
 	db, err := sql.Open(config.DBType, config.DBconfig)
 	check(err)
 	defer db.Close()
-	fmt.Println(roomid)
 	statement := `UPDATE rooms SET beingserved = $1 WHERE roomid = $2;`
 	_, err = db.Exec(statement, true, roomid)
 	check(err)
@@ -158,7 +119,7 @@ func ClientListWSHandler(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	// Find by organisation too.
-	statement := `SELECT roomid FROM rooms WHERE beingserved='f' AND organisation=$1;`
+	statement := `SELECT roomid, username FROM rooms WHERE beingserved='f' AND organisation=$1;`
 	rows, err := db.Query(statement, organisation)
 	check(err)
 	defer rows.Close()
@@ -167,7 +128,7 @@ func ClientListWSHandler(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		serveme := notBeingServed{}
-		err = rows.Scan(&serveme.Roomid)
+		err = rows.Scan(&serveme.Roomid, &serveme.Username)
 		check(err)
 		serveme.Beingserved = false
 		serviceSlice = append(serviceSlice, serveme)
@@ -212,4 +173,44 @@ func ClientProfileHandler(w http.ResponseWriter, r *http.Request) {
 	row.Scan(&clientProfile.Username, &clientProfile.Age, &clientProfile.Gender, &clientProfile.Issues, &clientProfile.Roomid, &clientProfile.Organisation)
 
 	t.ExecuteTemplate(w, "base", clientProfile)
+}
+
+func Listen(ws *websocket.Conn, organisation string) {
+	reportProblem := func(ev pq.ListenerEventType, err error) {
+		check(err)
+	}
+
+	listener := pq.NewListener(config.DBconfig, 10*time.Second, time.Minute, reportProblem)
+	err := listener.Listen("events")
+	check(err)
+
+	fmt.Println("Start monitoring PostgreSQL...")
+	for {
+		waitForNotification(listener, ws, organisation)
+	}
+}
+
+func waitForNotification(l *pq.Listener, ws *websocket.Conn, organisation string) {
+	counter := 0
+	for {
+		select {
+		case n := <-l.Notify:
+			fmt.Println(n.Extra)
+			data := notBeingServed{}
+			_ = json.Unmarshal([]byte(n.Extra), &data)
+			if organisation != data.Organisation {
+				return
+			}
+			payload := []notBeingServed{data}
+			ws.WriteJSON(payload)
+		case <-time.After(120 * time.Second):
+			fmt.Println("Received no events for 120 seconds, checking connection")
+			l.Ping()
+			fmt.Println(counter)
+			counter++
+			// go func() {
+			// 	l.Ping()
+			// }()
+		}
+	}
 }

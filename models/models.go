@@ -69,6 +69,7 @@ func DBSetup() {
 		(
 		  select NEW.roomid,
 				 NEW.beingserved,
+				 NEW.username,
 				 NEW.organisation
 		)
 		select pg_notify('events', row_to_json(payload)::text)
@@ -85,7 +86,7 @@ func DBSetup() {
 
 	statement = `DROP TRIGGER IF EXISTS products_notify_event ON rooms;
 				CREATE TRIGGER products_notify_event
-				AFTER UPDATE ON rooms
+				AFTER INSERT OR UPDATE ON rooms
 				FOR EACH ROW EXECUTE PROCEDURE notify_event();`
 	_, err = db.Exec(statement)
 	check(err)
