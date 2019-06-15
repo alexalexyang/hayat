@@ -12,15 +12,12 @@ This is my attempt to build a chat SAAS.
 - Save messages so they can be reloaded if connection breaks for whatever reason.
 - Delete saved messages when cleaning up rooms.
 
-
 ## ExplicitAuth
 - Delete all members and traces of organisation upon deletion of organisation by manager.
 - Double-check placeholders. `?` vs. `$1`.
 
 
-
 # Learning sources
-
 
 ## Listen and notify on row with postgres
 

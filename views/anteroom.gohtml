@@ -1,10 +1,10 @@
 {{define "yield" }}
 
 <h1>
-    <label>Issues</label>
-</h2>
+    Issues
+</h1>
 
-<form id="form" name="anteroomForm" action="http://localhost:8000/anteroom" method="post">
+<form id="anteroomForm" name="anteroomForm" action="http://localhost:8000/anteroom" method="post">
     <input type="hidden" name="token" value="secret_key_here">
   <p>
     <label>Username</label><br>
@@ -27,7 +27,5 @@
     <button type="reset">Reset form</button>
   </p>
 </form>
-
-<script src="static/anteroom.js"></script>
 
 {{end}}
