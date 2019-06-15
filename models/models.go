@@ -30,7 +30,7 @@ func DBSetup() {
 				gender TEXT,
 				issues TEXT,
 				beingserved bool,
-				emptysince TEXT
+				emptysince TIMESTAMPTZ
 				);`
 	_, err = db.Exec(statement)
 	check(err)

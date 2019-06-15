@@ -21,6 +21,7 @@ func check(err error) {
 }
 
 func main() {
+	models.DBSetup()
 
 	RoomsRegistry := chat.Registry{
 		Rooms: make(map[string]chat.ChatroomStruct),
@@ -28,7 +29,7 @@ func main() {
 
 	RoomsRegistry.Rebuild()
 	go RoomsRegistry.CleanUpRooms()
-	models.DBSetup()
+
 	log.Println("http server started on", config.Port)
 	http.ListenAndServe(config.Port, initRouter(&RoomsRegistry))
 }

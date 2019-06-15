@@ -172,8 +172,13 @@ func (rg *Registry) ChatClientWSHandler(w http.ResponseWriter, r *http.Request) 
 	roomCookie, err := r.Cookie("clientroom")
 	check(err)
 
+	// Update emptysince with 6 hours in case this is a reconnect. Also limits new chats to 6 hours.
+	statement := `UPDATE rooms SET emptysince = $1 WHERE roomid = $2;`
+	_, err = db.Exec(statement, time.Now().Add(6*time.Hour), roomCookie.Value)
+	check(err)
+
 	// Use cookie to get client's name from their profile.
-	statement := `SELECT username from rooms WHERE roomid = $1;`
+	statement = `SELECT username from rooms WHERE roomid = $1;`
 	row := db.QueryRow(statement, roomCookie.Value)
 	var username string
 	row.Scan(&username)
@@ -205,11 +210,13 @@ func (rg *Registry) chatBroker(room *ChatroomStruct, ws *websocket.Conn, usernam
 
 			// Set EmptySince to time.Now() so that cleanUpRooms() can delete the room in a couple of hours.
 			if len(room.Clients) == 0 {
-				fmt.Println("Next line is room Emptyslice")
-				room.EmptySince = time.Now()
-				rm := rg.Rooms[roomid]
-				rm.EmptySince = time.Now()
-				rg.Rooms[roomid] = rm
+				db, err := sql.Open(config.DBType, config.DBconfig)
+				check(err)
+				defer db.Close()
+				statement := `UPDATE rooms SET emptysince = $1 WHERE roomid = $2;`
+				_, err = db.Exec(statement, time.Now(), roomid)
+				check(err)
+
 				delete(rg.Rooms, room.ID)
 			}
 			break
@@ -222,11 +229,13 @@ func (rg *Registry) chatBroker(room *ChatroomStruct, ws *websocket.Conn, usernam
 				client.Close()
 				delete(room.Clients, ws)
 				if len(room.Clients) == 0 {
-					fmt.Println("Next line is room Emptyslice")
-					room.EmptySince = time.Now()
-					rm := rg.Rooms[roomid]
-					rm.EmptySince = time.Now()
-					rg.Rooms[roomid] = rm
+					db, err := sql.Open(config.DBType, config.DBconfig)
+					check(err)
+					defer db.Close()
+					statement := `UPDATE rooms SET emptysince = $1 WHERE roomid = $2;`
+					_, err = db.Exec(statement, time.Now(), roomid)
+					check(err)
+
 					delete(rg.Rooms, room.ID)
 				}
 				break
@@ -257,34 +266,34 @@ func (rg *Registry) Rebuild() {
 		check(err)
 
 		room := ChatroomStruct{
-			ID: roomid,
+			ID:      roomid,
+			Clients: make(map[*websocket.Conn]bool),
 		}
 		rg.Rooms[roomid] = room
 	}
+
 }
 
 // Deletes rooms from the room registry if they've been empty for an hour.
 func (r *Registry) CleanUpRooms() {
+	db, err := sql.Open(config.DBType, config.DBconfig)
+	check(err)
+	defer db.Close()
 	for {
-		if len(r.Rooms) == 0 {
-			fmt.Println("No rooms.")
-		}
 		for room, _ := range r.Rooms {
 			if len(r.Rooms[room].Clients) == 0 {
-				fmt.Println(time.Since(r.Rooms[room].EmptySince).Seconds())
-				fmt.Println("Room is: ", room)
-				if time.Since(r.Rooms[room].EmptySince).Seconds() > 3600.00 {
+				statement := `SELECT emptysince from rooms WHERE roomid = $1;`
+				row := db.QueryRow(statement, room)
+				var emptysince time.Time
+				row.Scan(&emptysince)
+				if time.Since(emptysince).Seconds() > 3600.00 {
 					delete(r.Rooms, room)
-
-					db, err := sql.Open(config.DBType, config.DBconfig)
-					check(err)
-					defer db.Close()
 					statement := `DELETE FROM rooms WHERE roomid=$1;`
 					_, err = db.Exec(statement, room)
 					check(err)
 				}
 			}
 		}
-		time.Sleep(4 * time.Second)
+		time.Sleep(3600 * time.Second)
 	}
 }
