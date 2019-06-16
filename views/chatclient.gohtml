@@ -11,5 +11,12 @@
 			<button type="submit">Send msg</button>
 		</form>
 	</div>
-	<script src="../static/chatclient.js"></script>
+
+	<script>
+	var allCookies = document.cookie.split("=");
+	var imported = document.createElement('script');
+	imported.src = `${allCookies[1]}/static/chatclient.js`;
+	document.head.appendChild(imported);
+	</script>
+	{{/* <script src="http://localhost:8000/static/chatclient.js"></script> */}}
 {{end}}

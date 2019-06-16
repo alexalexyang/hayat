@@ -4,7 +4,7 @@
     Issues
 </h1>
 
-<form id="anteroomForm" name="anteroomForm" action="http://localhost:8000/anteroom" method="post">
+<form id="anteroomForm" name="anteroomForm" action="#" method="post">
     <input type="hidden" name="token" value="secret_key_here">
   <p>
     <label>Username</label><br>
@@ -27,5 +27,12 @@
     <button type="reset">Reset form</button>
   </p>
 </form>
+
+<script>
+  var host = "http://localhost:8000";
+  document.cookie = `host=${host}`;
+  var allCookies = document.cookie.split("=");
+  document.anteroomForm.action = `${allCookies[1]}/anteroom`
+</script>
 
 {{end}}

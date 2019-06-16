@@ -4,7 +4,7 @@
     Change Password
 </h1>
 
-<form id="changepw" name="changepw" action="http://localhost:8000/changepw/" method="post">
+<form id="changepw" name="changepw" action="#" method="post">
   <p>
     <label>New password</label><br>
     <input type="password" name="password">
@@ -15,8 +15,11 @@
 </form>
 
 <script>
-  var path = window.location.href;
-  document.changepw.action = path
+	var allCookies = document.cookie.split("=");
+
+  var pathname = window.location.pathname;
+
+  document.changepw.action = `${allCookies[1]}${pathname}`
 </script>
 
 {{end}}

@@ -4,7 +4,7 @@
     Login
 </h1>
 
-<form id="loginform" name="login" action="http://localhost:8000/login" method="post">
+<form id="loginform" name="login" action="#/login" method="post">
   <p>
     <label>Email</label><br>
     <input type="email" name="email">
@@ -19,5 +19,12 @@
     <button type="reset">Reset form</button>
   </p>
 </form>
+
+<script>
+  var host = "http://localhost:8000";
+  document.cookie = `host=${host}`;
+  var allCookies = document.cookie.split("=");
+  document.getElementById('loginForm').action = `${allCookies[1]}/anteroom`
+</script>
 
 {{end}}
