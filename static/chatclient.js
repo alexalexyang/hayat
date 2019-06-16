@@ -1,11 +1,5 @@
 window.onload = function() {
-
     var pathname = document.location.pathname;
-
-    console.log(pathname);
-    // console.log(document.roomid.value);
-
-    // get the references of the page elements.
     var form = document.getElementById('form-msg');
     var txtMsg = document.getElementById('msg');
     var listMsgs = document.getElementById('msgs');
@@ -18,9 +12,7 @@ window.onload = function() {
     socket.onopen = function(event) {
         // socketStatus.innerHTML = 'Connected to: ' + event.currentTarget.url;
         socketStatus.innerHTML = ''
-        console.log(event.currentTarget.url)
         socketStatus.className = 'open';
-
     };
 
     socket.onerror = function(error) {

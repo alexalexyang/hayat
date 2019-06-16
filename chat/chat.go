@@ -140,7 +140,6 @@ func (r *Registry) getRoom(roomid string) ChatroomStruct {
 func (rg *Registry) ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	urlid := params["id"]
-
 	cookies := r.Cookies()
 	cookieMap := make(map[string]string)
 	for _, cookie := range cookies {
@@ -182,7 +181,6 @@ func (rg *Registry) ChatClientWSHandler(w http.ResponseWriter, r *http.Request) 
 	row := db.QueryRow(statement, roomCookie.Value)
 	var username string
 	row.Scan(&username)
-
 	// Check if user was already in a room and just reconnecting now.
 	if _, ok := rg.Rooms[roomCookie.Value]; ok {
 		room := rg.getRoom(urlid)
@@ -242,12 +240,6 @@ func (rg *Registry) chatBroker(room *ChatroomStruct, ws *websocket.Conn, usernam
 			}
 		}
 	}
-}
-
-func (c *ChatroomStruct) setTime() {
-	c.EmptySince = time.Now()
-	fmt.Println("Time set to:")
-	fmt.Println(c.EmptySince)
 }
 
 // In case program crashes, rebuild RoomsRegistry.Rooms on restart.

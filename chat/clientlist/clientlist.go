@@ -100,11 +100,6 @@ func ClientListHandler(w http.ResponseWriter, r *http.Request) {
 	statement := `UPDATE rooms SET beingserved = $1 WHERE roomid = $2;`
 	_, err = db.Exec(statement, true, roomid)
 	check(err)
-
-	statement = `INSERT INTO rooms (roomid, organisation, username)
-				VALUES ($1, $2, $3);`
-	_, err = db.Exec(statement, roomid, organisation, username)
-	check(err)
 }
 
 func ClientListWSHandler(w http.ResponseWriter, r *http.Request) {
@@ -196,6 +191,7 @@ func waitForNotification(l *pq.Listener, ws *websocket.Conn, organisation string
 		select {
 		case n := <-l.Notify:
 			data := notBeingServed{}
+
 			_ = json.Unmarshal([]byte(n.Extra), &data)
 			if organisation != data.Organisation {
 				return

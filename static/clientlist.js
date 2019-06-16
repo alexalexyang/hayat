@@ -14,6 +14,7 @@ window.onload = function() {
     };
 
     submitter = function(roomid, username) {
+        console.log("once or twice")
         document.clientlistForm.inputRoom.value = roomid;
         document.getElementById('clientlistForm').submit();
         chats.insertAdjacentHTML('beforeend', `<iframe name="frame-${roomid}" id="viewer${roomid}" class="ChannelView" style="display:none" src="http://localhost:8000/clientprofile/${roomid}"></iframe>`);
@@ -32,6 +33,7 @@ window.onload = function() {
 
     socket.onmessage = function(event) {
         var msg = JSON.parse(event.data);
+        console.log(event.data)
 
         for (let i = 0; i < msg.length; i++) {
             if (msg[i].beingserved == false) {
