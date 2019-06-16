@@ -86,7 +86,7 @@ func CookieSetter(w http.ResponseWriter, cookieName string, encodedValue string,
 
 func AnteroomHandler(w http.ResponseWriter, r *http.Request) {
 
-	t, err := template.ParseFiles("views/base.gohtml", "views/anteroom.gohtml")
+	t, err := template.ParseFiles("./views/base.gohtml", "./views/anteroom.gohtml")
 	check(err)
 
 	if r.Method != http.MethodPost {
@@ -119,7 +119,7 @@ func AnteroomHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ChatClientHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("views/base.gohtml", "views/chatclient.gohtml")
+	t, err := template.ParseFiles("./views/base.gohtml", "./views/chatclient.gohtml")
 	check(err)
 
 	t.ExecuteTemplate(w, "base", nil)

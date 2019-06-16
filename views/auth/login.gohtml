@@ -4,7 +4,7 @@
     Login
 </h1>
 
-<form id="loginform" name="login" action="#/login" method="post">
+<form id="loginForm" name="loginForm" action="#" method="post">
   <p>
     <label>Email</label><br>
     <input type="email" name="email">
@@ -22,9 +22,11 @@
 
 <script>
   var host = "http://localhost:8000";
-  document.cookie = `host=${host}`;
+  document.cookie = `hosdfsdst=${host}`;
   var allCookies = document.cookie.split("=");
-  document.getElementById('loginForm').action = `${allCookies[1]}/anteroom`
+  console.log(allCookies)
+  console.log(allCookies[1])
+  document.loginForm.action = `${allCookies[1]}/login`
 </script>
 
 {{end}}

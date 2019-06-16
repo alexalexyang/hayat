@@ -56,6 +56,14 @@ This is a young project being built by one person with a lot of other pressing m
 - Consider session cookies rather than cookies, esp. using the Gorilla package.
 - Allow users who don't have websites to use my subdomain.
 
+## App host url
+- Find a way to dynamically load host URL in dev, staging, and prod.
+- Currently need to hardcode host URL in:
+  - /anteroom
+  - /login
+  - /forgotpw
+  - /changepw
+
 ## ExplicitAuth
 - Delete all members and traces of organisation upon deletion of organisation by manager.
 - Double-check placeholders. `?` vs. `$1`.

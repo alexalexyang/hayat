@@ -4,7 +4,7 @@
     You're invited
 </h1>
 
-<form id="invite" name="invite" action="http://localhost:8000/invite" method="post">
+<form id="invite" name="invite" action="#" method="post">
   <p>
     <label>Email</label><br>
     <input type="email " name="email">
@@ -19,5 +19,10 @@
     <button type="submit">Submit</button>
   </p>
 </form>
+
+<script>
+  var allCookies = document.cookie.split("=");
+  document.invite.action = `${allCookies[1]}/invite`
+</script>
 
 {{end}}

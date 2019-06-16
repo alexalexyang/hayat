@@ -4,9 +4,14 @@
     Logout
 </h1>
 
-<form id="logoutform" name="logoutform" action="http://localhost:8000/logout" method="post">
+<form id="logoutForm" name="logoutForm" action="http://localhost:8000/logout" method="post">
     <button type="submit" name="logout" value="logout">logout</button>
   </p>
 </form>
+
+<script>
+  var allCookies = document.cookie.split("=");
+  document.logoutForm.action = `${allCookies[1]}/logout`
+</script>
 
 {{end}}

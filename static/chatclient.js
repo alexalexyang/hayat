@@ -1,4 +1,5 @@
 window.onload = function() {
+    var allCookies = document.cookie.split("/");
     var pathname = document.location.pathname;
     var form = document.getElementById('form-msg');
     var txtMsg = document.getElementById('msg');
@@ -7,8 +8,7 @@ window.onload = function() {
     var btnClose = document.getElementById('close');
 
     // Creating a new WebSocket connection.
-    var socket = new WebSocket('ws://localhost:8000/chatclientws/' + pathname.split("/")[2]);
-
+    var socket = new WebSocket(`ws://${allCookies[2]}/chatclientws/` + pathname.split("/")[2]);
     socket.onopen = function(event) {
         // socketStatus.innerHTML = 'Connected to: ' + event.currentTarget.url;
         socketStatus.innerHTML = ''

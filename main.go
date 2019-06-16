@@ -36,6 +36,7 @@ func main() {
 
 func initRouter(rg *chat.Registry) *mux.Router {
 	router := mux.NewRouter()
+	// router.PathPrefix("/views/").Handler(http.StripPrefix("/views/", http.FileServer(http.Dir("views"))))
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	router.HandleFunc("/anteroom", chat.AnteroomHandler)
 

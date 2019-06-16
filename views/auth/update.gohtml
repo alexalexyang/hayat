@@ -4,7 +4,7 @@
     Update
 </h1>
 
-<form id="updateForm" name="updateForm" action="http://localhost:8000/update" method="post">
+<form id="updateForm" name="updateForm" action="#" method="post">
   <p>
     <label>Username</label><br>
     <input type="text" name="username" placeholder="{{.username}}">
@@ -22,5 +22,11 @@
     <button type="reset">Reset form</button>
   </p>
 </form>
+
+<script>
+  var allCookies = document.cookie.split("=");
+  console.log(allCookies)
+  document.updateForm.action = `${allCookies[1]}/update`
+</script>
 
 {{end}}

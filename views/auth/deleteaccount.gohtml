@@ -4,7 +4,7 @@
   Delete account
 </h1>
 
-<form id="deleteaccountform" name="deleteaccountform" action="http://localhost:8000/deleteaccount" method="post">
+<form id="deleteAccountForm" name="deleteAccountForm" action="#" method="post">
   <p>
     <label>email</label><br>
     <input type="email" name="email">
@@ -16,5 +16,10 @@
     <button type="submit">Delete account</button>
   </p>
 </form>
+
+<script>
+	var allCookies = document.cookie.split("=");
+  document.deleteAccountForm.action = `${allCookies[1]}/deleteaccount`
+</script>
 
 {{end}}

@@ -15,11 +15,8 @@
 </form>
 
 <script>
-	var allCookies = document.cookie.split("=");
-
-  var pathname = window.location.pathname;
-
-  document.changepw.action = `${allCookies[1]}${pathname}`
+  var path= window.location.href;
+  document.changepw.action = path
 </script>
 
 {{end}}
