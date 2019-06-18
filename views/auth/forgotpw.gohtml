@@ -4,7 +4,7 @@
     Forgot Password
 </h1>
 
-<form id="forgotpw" name="forgotpw" action="http://localhost:8000/forgotpw" method="post">
+<form id="forgotpw" name="forgotpw" action="#" method="post">
   <p>
     <label>email</label><br>
     <input type="email" name="email">
@@ -14,4 +14,27 @@
   </p>
 </form>
 
+<script>
+var page = "/forgotpw"
+
+var request = new XMLHttpRequest();
+request.open('GET', '../static/config.json');
+request.responseType = 'json';
+request.send();
+
+if (window.location.hostname == "localhost") {
+    request.onload = function() {
+        protocol = request.response[0].http
+        host = request.response[0].localhost
+        document.forgotpw.action = `${protocol}${host}${page}`
+    }
+} else {
+    request.onload = function() {
+        protocol = request.response[0].http
+        host = request.response[0].host
+        document.forgotpw.action = `${protocol}${host}${page}`
+    }
+}
+
+</script>
 {{end}}

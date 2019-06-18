@@ -21,8 +21,26 @@
 </form>
 
 <script>
-  var allCookies = document.cookie.split("=");
-  document.invite.action = `${allCookies[1]}/invite`
+var page = "/invite"
+
+var request = new XMLHttpRequest();
+request.open('GET', '../static/config.json');
+request.responseType = 'json';
+request.send();
+
+if (window.location.hostname == "localhost") {
+    request.onload = function() {
+        protocol = request.response[0].http
+        host = request.response[0].localhost
+        document.invite.action = `${protocol}${host}${page}`
+    }
+} else {
+    request.onload = function() {
+        protocol = request.response[0].http
+        host = request.response[0].host
+        document.invite.action = `${protocol}${host}${page}`
+    }
+}
 </script>
 
 {{end}}

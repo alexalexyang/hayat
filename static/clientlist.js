@@ -1,5 +1,32 @@
+var request = new XMLHttpRequest();
+request.open('GET', '../static/config.json');
+request.responseType = 'json';
+request.send();
+
+var httpProtocol
+var wsProtocol
+var host
+
+if (window.location.hostname == "localhost") {
+    request.onload = function() {
+        httpProtocol = request.response[0].http
+        wsProtocol = request.response[0].ws
+        host = request.response[0].localhost
+
+        document.clientlistForm.action = `${httpProtocol}${host}/clientlist`
+    }
+} else {
+    request.onload = function() {
+        httpProtocol = request.response[0].http
+        wsProtocol = request.response[0].ws
+        host = request.response[0].host
+
+        document.clientlistForm.action = `${httpProtocol}${host}/clientlist`
+    }
+}
+
 window.onload = function() {
-    var socket = new WebSocket('ws://localhost:8000/clientlistws');
+    var socket = new WebSocket(`${wsProtocol}${host}/clientlistws`);
     var listRooms = document.getElementById('room');
     var inputRoom = document.getElementById('inputRoom');
     var chats = document.getElementById('chat');

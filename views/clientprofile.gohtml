@@ -15,6 +15,29 @@
 	<h2>Issues</h2>
 	<p>{{.Issues}}</p>
 
-	<p><a href="http://localhost:8000/chatclient/{{.Roomid}}">Chat now.</p>
+	<p><a id="chatnow" href="#">Chat now.</p>
+
+<script>
+var page = "/chatclient/{{.Roomid}}"
+
+var request = new XMLHttpRequest();
+request.open('GET', '../static/config.json');
+request.responseType = 'json';
+request.send();
+
+if (window.location.hostname == "localhost") {
+    request.onload = function() {
+        protocol = request.response[0].http
+        host = request.response[0].localhost
+        document.getElementById("chatnow").href = `${protocol}${host}${page}`
+    }
+} else {
+    request.onload = function() {
+        protocol = request.response[0].http
+        host = request.response[0].host
+        document.getElementById("chatnow").href = `${protocol}${host}${page}`
+    }
+}
+</script>
 
 {{end}}

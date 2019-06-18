@@ -24,8 +24,27 @@
 </form>
 
 <script>
-  var path = window.location.href;
-  document.registerForm.action = path
-  console.log(path)
+  var pathname = window.location.pathname;
+  var origin = window.location.origin
+
+var request = new XMLHttpRequest();
+request.open('GET', `${origin}/static/config.json`);
+request.responseType = 'json';
+request.send();
+
+if (window.location.hostname == "localhost") {
+    request.onload = function() {
+        protocol = request.response[0].http
+        host = request.response[0].localhost
+        document.registerForm.action = `${protocol}${host}${pathname}`
+    }
+} else {
+    request.onload = function() {
+        protocol = request.response[0].http
+        host = request.response[0].host
+        document.registerForm.action = `${protocol}${host}${pathname}`
+    }
+}
+
 </script>
 {{end}}

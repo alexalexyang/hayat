@@ -21,12 +21,26 @@
 </form>
 
 <script>
-  var host = "http://localhost:8000";
-  document.cookie = `hosdfsdst=${host}`;
-  var allCookies = document.cookie.split("=");
-  console.log(allCookies)
-  console.log(allCookies[1])
-  document.loginForm.action = `${allCookies[1]}/login`
+var page = "/login"
+
+var request = new XMLHttpRequest();
+request.open('GET', '../static/config.json');
+request.responseType = 'json';
+request.send();
+
+if (window.location.hostname == "localhost") {
+    request.onload = function() {
+        protocol = request.response[0].http
+        host = request.response[0].localhost
+        document.loginForm.action = `${protocol}${host}${page}`
+    }
+} else {
+    request.onload = function() {
+        protocol = request.response[0].http
+        host = request.response[0].host
+        document.loginForm.action = `${protocol}${host}${page}`
+    }
+}
 </script>
 
 {{end}}
