@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"strconv"
 	"time"
 
@@ -119,6 +120,13 @@ func AnteroomHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ChatClientHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("ChatClientHandler: I got a request.")
+	requestDump, err := httputil.DumpRequest(r, true)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(string(requestDump))
+
 	t, err := template.ParseFiles("./views/base.gohtml", "./views/chatclient.gohtml")
 	check(err)
 
@@ -138,6 +146,14 @@ func (r *Registry) getRoom(roomid string) ChatroomStruct {
 }
 
 func (rg *Registry) ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("ChatClientWSHandler: I got a request.")
+	requestDump, err := httputil.DumpRequest(r, true)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(string(requestDump))
+
+	fmt.Println("Step 1")
 	params := mux.Vars(r)
 	urlid := params["id"]
 	cookies := r.Cookies()
@@ -145,7 +161,7 @@ func (rg *Registry) ChatClientWSHandler(w http.ResponseWriter, r *http.Request) 
 	for _, cookie := range cookies {
 		cookieMap[cookie.Name] = cookie.Value
 	}
-
+	fmt.Println("Step 2")
 	if _, ok := cookieMap["consultant"]; ok {
 		if _, ok := rg.Rooms[urlid]; ok {
 			room := rg.getRoom(urlid)
@@ -159,11 +175,11 @@ func (rg *Registry) ChatClientWSHandler(w http.ResponseWriter, r *http.Request) 
 		}
 		return
 	}
-
+	fmt.Println("Step 3")
 	ws, err := upgrader.Upgrade(w, r, nil)
 	check(err)
 	defer ws.Close()
-
+	fmt.Println("Step 4")
 	db, err := sql.Open(config.DBType, config.DBconfig)
 	check(err)
 	defer db.Close()
@@ -189,11 +205,12 @@ func (rg *Registry) ChatClientWSHandler(w http.ResponseWriter, r *http.Request) 
 		rg.chatBroker(&room, ws, username, roomCookie.Value)
 		return
 	}
-
+	fmt.Println("Step 5")
 	// Create a chatroom.
 	chatroom := rg.ChatRoomMaker(&roomCookie.Value, ws)
-
+	fmt.Println("Step 6")
 	rg.chatBroker(&chatroom, ws, username, roomCookie.Value)
+	fmt.Println("Step 7")
 }
 
 func (rg *Registry) chatBroker(room *ChatroomStruct, ws *websocket.Conn, username string, roomid string) {
