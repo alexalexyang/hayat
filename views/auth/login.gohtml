@@ -20,26 +20,21 @@
   </p>
 </form>
 
+<script src="https://hayat.notathoughtexperiment.me/static/config.js"></script>
+
 <script>
 var page = "/login"
-
-var request = new XMLHttpRequest();
-request.open('GET', '../static/config.json');
-request.responseType = 'json';
-request.send();
+var protocol
+var host
 
 if (window.location.hostname == "localhost") {
-    request.onload = function() {
-        protocol = request.response[0].http
-        host = request.response[0].localhost
-        document.loginForm.action = `${protocol}${host}${page}`
-    }
+    protocol = config["http"]
+    host = config["localhost"]
+    document.loginForm.action = `${protocol}${host}${page}`
 } else {
-    request.onload = function() {
-        protocol = request.response[0].http
-        host = request.response[0].host
-        document.loginForm.action = `${protocol}${host}${page}`
-    }
+    protocol = config["https"]
+    host = config["host"]
+    document.loginForm.action = `${protocol}${host}${page}`
 }
 </script>
 

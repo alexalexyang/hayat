@@ -8,29 +8,37 @@ The following sections are mainly for consultants.
 
 # How to use
 
-## Installation
+## Clients
 
-The program is in two parts:
+Clients who need to talk arrive at the /anteroom page. They fill in their details and click submit.
 
-### The /anteroom page
+Upon the submission of the form, two main things happen:
 
-You'll probably need help for this one. You'll need to embed anteroom.html in an iframe or something anywhere on your own website. Replace "secret_key_here" in `token` with the organisation name you registered with.
+- Form details are sent to /clientprofile page.
+- Client is brought to /chatclient page to wait for a consultant to connect.
 
-This allows you to maintain your own branding (that is, after I figure out how to let you use your own CSS without introducing security risks).
+Note:
+- Client will be disconnected if they don't speak for a while. I'll fix this hopefully soon.
 
-### The rest of it
+## Consultants
 
-There's no installation for the rest of the program. Register yourself as manager of your organisation at /register/org.
+### Registration
 
-Once you register and log in, you can invite other members of your staff to join at /invite. Set whether or not the invitee should be Manager or Staff. An email with a one-time-only link to a registration page will be emailed to the invitee.
+A consultant must first register as an organisation at /register/org. The first consultant to do so will be the manager of this organisation.
 
-Managers get to delete the entire organisation, including all staff. So, be careful.
+The manager can then invite other consultants to join at /invite. Here, the manager can choose to make other consultants managers or staff. Managers get to delete the whole organisation, other managers, and staff.
 
-## Clientlist
+**SEB, FOR THE PURPOSES OF TESTING, PLEASE USE secret_key_here AS YOUR ORGANISATION**
 
-Once you log in, you'll be brought to /clientlist. Whenever clients start a chat, their username will appear on this page. Clicking it will open their profile inside an embedded window.
+### Clientlist page
+
+Log in at /login. Once logged in, the consultant is brought to the /clientlist page. Whenever clients start a chat, their username will appear on this page. Clicking it will open their profile inside an embedded window.
 
 Click "Chat now." after you're done reading their profile. Their chatroom will open in the same embedded window.
+
+Note:
+- Do not reload this page. All your chats will be gone. I'll work on this later.
+- Consultant will be disconnected if they don't speak for a while. I'll fix this hopefully soon.
 
 
 # Please note
@@ -44,10 +52,34 @@ This is a young project being built by one person with a lot of other pressing m
 - This is not a stable product yet. It will probably take anywhere between now and 2021 to become truly usable and secure unless I get an injection of $$$.
 
 
+# Installation
+
+The program is in two parts:
+
+## The /anteroom page
+
+You'll probably need help for this one. You'll need to embed anteroom.html in an iframe or something anywhere on your own website. Replace "secret_key_here" in `token` with the organisation name you registered with.
+
+This allows you to maintain your own branding (that is, after I figure out how to let you use your own CSS without introducing security risks).
+
+## The rest of it
+
+There's no installation for the rest of the program. Register yourself as manager of your organisation at /register/org.
+
+Once you register and log in, you can invite other members of your staff to join at /invite. Set whether or not the invitee should be Manager or Staff. An email with a one-time-only link to a registration page will be emailed to the invitee.
+
+Managers get to delete the entire organisation, including all staff. So, be careful.
+
+
 # Todos
+
+## Priority
+- Add heartbeat to keep chats alive.
+- Figure out how to tell the difference between an empty chatroom and if users are just being quiet.
 
 ## UX
 - Add navbar/links to essential pages.
+  - Show only links necessary to each user, eg: don't show login to consultant already logged in.
 - Add button to remove chat tab and close websocket.
 - Add separate div so consultant can continue to refer to client's profile.
 
@@ -70,6 +102,7 @@ This is a young project being built by one person with a lot of other pressing m
 
 ## Misc.
 - Allow users who don't have websites to use my subdomain.
+- Add slice to displayTemplate helper function for unlimited templates.
 
 
 # Learning sources

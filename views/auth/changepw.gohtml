@@ -14,28 +14,21 @@
   </p>
 </form>
 
-<script>
-  var pathname = window.location.pathname;
-  document.changepw.action = pathname
+<script src="https://hayat.notathoughtexperiment.me/static/config.js"></script>
 
-var request = new XMLHttpRequest();
-request.open('GET', '../static/config.json');
-request.responseType = 'json';
-request.send();
+<script>
+var page = "/changepw"
+var protocol
+var host
 
 if (window.location.hostname == "localhost") {
-    request.onload = function() {
-        protocol = request.response[0].http
-        host = request.response[0].localhost
-        document.changepw.action = `${protocol}${host}${pathname}`
-    }
+    protocol = config["http"]
+    host = config["localhost"]
+    document.changepw.action = `${protocol}${host}${page}`
 } else {
-    request.onload = function() {
-        protocol = request.response[0].http
-        host = request.response[0].host
-        document.changepw
-        document.changepw.action = `${protocol}${host}${pathname}`
-    }
+    protocol = config["https"]
+    host = config["host"]
+    document.changepw.action = `${protocol}${host}${page}`
 }
 </script>
 

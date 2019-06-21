@@ -27,8 +27,8 @@ var Cfg = auth.Config{
 	SessionCookieName: "SessionCookie",
 }
 
-func displayTemplate(w http.ResponseWriter, r *http.Request, baseTemplate string, pageTemplate string) {
-	t, err := template.ParseFiles(baseTemplate, pageTemplate)
+func displayTemplate(w http.ResponseWriter, r *http.Request, baseTemplate string, navbarTemplate string, pageTemplate string) {
+	t, err := template.ParseFiles(baseTemplate, navbarTemplate, pageTemplate)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -37,7 +37,7 @@ func displayTemplate(w http.ResponseWriter, r *http.Request, baseTemplate string
 
 func DeleteAccountHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		displayTemplate(w, r, "./views/base.gohtml", "./views/auth/deleteaccount.gohtml")
+		displayTemplate(w, r, "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/deleteaccount.gohtml")
 		return
 	}
 	if Cfg.DeleteAccount(w, r) == false {
@@ -50,7 +50,7 @@ func DeleteAccountHandler(w http.ResponseWriter, r *http.Request) {
 
 func ChangePwHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		displayTemplate(w, r, "./views/base.gohtml", "./views/auth/changepw.gohtml")
+		displayTemplate(w, r, "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/changepw.gohtml")
 		return
 	}
 	if Cfg.ChangePw(w, r) == false {
@@ -63,7 +63,7 @@ func ChangePwHandler(w http.ResponseWriter, r *http.Request) {
 
 func ForgotPwHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		displayTemplate(w, r, "./views/base.gohtml", "./views/auth/forgotpw.gohtml")
+		displayTemplate(w, r, "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/forgotpw.gohtml")
 		return
 	}
 	if Cfg.ForgotPw(w, r) == false {
@@ -76,7 +76,7 @@ func ForgotPwHandler(w http.ResponseWriter, r *http.Request) {
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		displayTemplate(w, r, "./views/base.gohtml", "./views/auth/logout.gohtml")
+		displayTemplate(w, r, "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/logout.gohtml")
 		return
 	}
 	if Cfg.Logout(w, r) == false {
@@ -89,7 +89,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		displayTemplate(w, r, "./views/base.gohtml", "./views/auth/login.gohtml")
+		displayTemplate(w, r, "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/login.gohtml")
 		return
 	}
 	if Cfg.Login(w, r) == false {
@@ -103,7 +103,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 func RegisterOrgHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		displayTemplate(w, r, "./views/base.gohtml", "./views/auth/registerorg.gohtml")
+		displayTemplate(w, r, "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/registerorg.gohtml")
 		return
 	}
 	if Cfg.Register(r) == false {
@@ -116,7 +116,7 @@ func RegisterOrgHandler(w http.ResponseWriter, r *http.Request) {
 
 func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		displayTemplate(w, r, "./views/base.gohtml", "./views/auth/registeruser.gohtml")
+		displayTemplate(w, r, "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/registeruser.gohtml")
 		return
 	}
 	if Cfg.Register(r) == false {
@@ -129,7 +129,7 @@ func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 
 func InviteHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		displayTemplate(w, r, "./views/base.gohtml", "./views/auth/invite.gohtml")
+		displayTemplate(w, r, "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/invite.gohtml")
 		return
 	}
 	if Cfg.Invite(w, r) == false {
@@ -143,7 +143,7 @@ func InviteHandler(w http.ResponseWriter, r *http.Request) {
 func UpdateHandler(w http.ResponseWriter, r *http.Request) {
 	userProfile, _ := Cfg.GetUser(r)
 	if r.Method != http.MethodPost {
-		t, err := template.ParseFiles("./views/base.gohtml", "./views/auth/update.gohtml")
+		t, err := template.ParseFiles("./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/update.gohtml")
 		if err != nil {
 			log.Fatal(err)
 		}

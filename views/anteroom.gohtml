@@ -28,6 +28,22 @@
   </p>
 </form>
 
-<script src="../static/anteroom.js"></script>
+<script src="https://hayat.notathoughtexperiment.me/static/config.js"></script>
+
+<script>
+var page = "/anteroom"
+var protocol
+var host
+
+if (window.location.hostname == "localhost") {
+    protocol = config["http"]
+    host = config["localhost"]
+    document.anteroomForm.action = `${protocol}${host}${page}`
+} else {
+    protocol = config["https"]
+    host = config["host"]
+    document.anteroomForm.action = `${protocol}${host}${page}`
+}
+</script>
 
 {{end}}
