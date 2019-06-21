@@ -41,34 +41,35 @@ This is a young project being built by one person with a lot of other pressing m
 - If a client disconnects from a chat before a consultant enters, the chat will still show on the clientlist until a consultant clicks into it. So, consultants may sometimes see an empty room.
 - I didn't think to add a separate section on the page for the client profile. I'll figure this out later.
 - If you accidentally reload your page, all chats are lost. Another thing for me to think about.
-- This is not a stable product yet. It will probably take anywhere between now and 2020 to become truly usable and secure.
+- This is not a stable product yet. It will probably take anywhere between now and 2021 to become truly usable and secure unless I get an injection of $$$.
 
 
 # Todos
 
-## Specific to app
-- Add button to chat tab to close websocket and remove itself.
+## UX
+- Add navbar/links to essential pages.
+- Add button to remove chat tab and close websocket.
 - Add separate div so consultant can continue to refer to client's profile.
+
+## Clean-up
+- Delete saved messages when cleaning up rooms.
+- Add timestamp to ExplicitAuth sessions table.
+  - Delete consultant session after X hours of inactivity.
+
+## Persistence
 - Prioritise database over in-memory storage for persistence.
 - Reload all messages and chats in case user accidentally reloads page.
 - Save messages so they can be reloaded if connection breaks for whatever reason.
-- Delete saved messages when cleaning up rooms.
+
+## Security
 - Consider session cookies rather than cookies, esp. using the Gorilla package.
-- Allow users who don't have websites to use my subdomain.
-
-## App host url
-- Find a way to dynamically load host URL in dev, staging, and prod.
-- Currently need to hardcode host URL in:
-  - /anteroom
-  - /login
-  - /forgotpw
-  - /changepw
-
-## ExplicitAuth
 - Delete all members and traces of organisation upon deletion of organisation by manager.
 - Double-check placeholders. `?` vs. `$1`.
 - Consider JWT rather than bcrypt.
 - Enforce client-side password best practices.
+
+## Misc.
+- Allow users who don't have websites to use my subdomain.
 
 
 # Learning sources

@@ -6,7 +6,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"net/http/httputil"
 	"strconv"
 	"time"
 
@@ -120,13 +119,6 @@ func AnteroomHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ChatClientHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("ChatClientHandler: I got a request.")
-	requestDump, err := httputil.DumpRequest(r, true)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(string(requestDump))
-
 	t, err := template.ParseFiles("./views/base.gohtml", "./views/chatclient.gohtml")
 	check(err)
 
@@ -146,13 +138,6 @@ func (r *Registry) getRoom(roomid string) ChatroomStruct {
 }
 
 func (rg *Registry) ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("WS: I got a request.")
-	requestDump, err := httputil.DumpRequest(r, true)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(string(requestDump))
-	
 	params := mux.Vars(r)
 	urlid := params["id"]
 	cookies := r.Cookies()
@@ -297,8 +282,6 @@ func (r *Registry) CleanUpRooms() {
 					check(err)
 				}
 			}
-
-			fmt.Println(room)
 		}
 		time.Sleep(5 * time.Second)
 	}

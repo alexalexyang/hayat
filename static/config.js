@@ -1,5 +1,5 @@
 var config = {
-    "host": "hayat.botschaft.me",
+    "host": "hayat.notathoughtexperiment.me",
     "localhost": "localhost:8000",
     "http": "http://",
     "https": "https://",

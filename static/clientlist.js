@@ -7,7 +7,7 @@ if (window.location.hostname == "localhost") {
     httpProtocol = config["http"]
     host = config["localhost"]
 } else {
-    wsProtocol = config["ws"]
+    wsProtocol = config["wss"]
     httpProtocol = config["http"]
     host = config["host"]
 }

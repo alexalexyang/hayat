@@ -5,7 +5,7 @@ if (window.location.hostname == "localhost") {
     protocol = config["ws"]
     host = config["localhost"]
 } else {
-    protocol = config["ws"]
+    protocol = config["wss"]
     host = config["host"]
 }
 
