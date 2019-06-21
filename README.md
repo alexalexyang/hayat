@@ -32,7 +32,9 @@ The manager can then invite other consultants to join at /invite. Here, the mana
 
 ### Clientlist page
 
-Log in at /login. Once logged in, the consultant is brought to the /clientlist page. Whenever clients start a chat, their username will appear on this page. Clicking it will open their profile inside an embedded window.
+After registration, log in at /login.
+
+Once logged in, the consultant is brought to the /clientlist page. Whenever clients start a chat, their username will appear on this page. Clicking it will open their profile inside an embedded window.
 
 Click "Chat now." after you're done reading their profile. Their chatroom will open in the same embedded window.
 
