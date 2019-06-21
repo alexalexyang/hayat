@@ -200,6 +200,8 @@ func waitForNotification(l *pq.Listener, ws *websocket.Conn, organisation string
 			data := notBeingServed{}
 
 			_ = json.Unmarshal([]byte(n.Extra), &data)
+			fmt.Println("n.Extra:")
+			fmt.Println(n.Extra)
 			if organisation != data.Organisation {
 				return
 			}

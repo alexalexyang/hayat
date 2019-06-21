@@ -17,27 +17,27 @@
 
 	<p><a id="chatnow" href="#">Chat now.</p>
 
+<script src="../static/config.js"></script>
+
 <script>
+console.log("Able to access JS.")
 var page = "/chatclient/{{.Roomid}}"
 
-var request = new XMLHttpRequest();
-request.open('GET', '../static/config.json');
-request.responseType = 'json';
-request.send();
+var protocol
+var host
 
 if (window.location.hostname == "localhost") {
-    request.onload = function() {
-        protocol = request.response[0].http
-        host = request.response[0].localhost
-        document.getElementById("chatnow").href = `${protocol}${host}${page}`
-    }
+	console.log("Localhost")
+    protocol = config["http"]
+    host = config["localhost"]
+	document.getElementById("chatnow").href = `${protocol}${host}${page}`
 } else {
-    request.onload = function() {
-        protocol = request.response[0].http
-        host = request.response[0].host
-        document.getElementById("chatnow").href = `${protocol}${host}${page}`
-    }
+	console.log("Not localhost")
+    protocol = config["http"]
+    host = config["host"]
+	document.getElementById("chatnow").href = `${protocol}${host}${page}`
 }
+console.log(document.getElementById("chatnow").href)
 </script>
 
 {{end}}
