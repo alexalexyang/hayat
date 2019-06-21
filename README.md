@@ -47,6 +47,7 @@ Note:
 
 This is a young project being built by one person with a lot of other pressing matters to deal with so there are flaws. In particular:
 
+- Because this is a testing phase, I may regularly delete the site and its database, which means you will have to register again.
 - Please set a strong and unique password for yourself because I haven't enforced password best practices yet.
 - If a client disconnects from a chat before a consultant enters, the chat will still show on the clientlist until a consultant clicks into it. So, consultants may sometimes see an empty room.
 - I didn't think to add a separate section on the page for the client profile. I'll figure this out later.
