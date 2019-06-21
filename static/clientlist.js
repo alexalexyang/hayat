@@ -1,46 +1,33 @@
-var request = new XMLHttpRequest();
-request.open('GET', '../static/config.json');
-request.responseType = 'json';
-request.send();
-
-var httpProtocol
+// var httpProtocol
 var wsProtocol
 var host
 
 if (window.location.hostname == "localhost") {
-    request.onload = function() {
-        httpProtocol = request.response[0].http
-        wsProtocol = request.response[0].ws
-        host = request.response[0].localhost
-
-        document.clientlistForm.action = `${httpProtocol}${host}/clientlist`
-    }
+    // httpProtocol = config["http"]
+    wsProtocol = config["ws"]
+    host = config["localhost"]
 } else {
-    request.onload = function() {
-        httpProtocol = request.response[0].http
-        wsProtocol = request.response[0].ws
-        host = request.response[0].host
-
-        document.clientlistForm.action = `${httpProtocol}${host}/clientlist`
-    }
+    // httpProtocol = config["http"]
+    wsProtocol = config["ws"]
+    host = config["host"]
 }
 
-window.onload = function() {
+window.onload = function () {
     var socket = new WebSocket(`${wsProtocol}${host}/clientlistws`);
     var listRooms = document.getElementById('room');
     var inputRoom = document.getElementById('inputRoom');
     var chats = document.getElementById('chat');
     var tabs = document.getElementById('tab');
 
-    socket.onopen = function(event) {
+    socket.onopen = function (event) {
         console.log("Open")
     };
 
-    socket.onerror = function(error) {
+    socket.onerror = function (error) {
         console.log('WebSocket error: ' + error);
     };
 
-    submitter = function(roomid, username) {
+    submitter = function (roomid, username) {
         console.log("once or twice")
         document.clientlistForm.inputRoom.value = roomid;
         document.getElementById('clientlistForm').submit();
@@ -48,7 +35,7 @@ window.onload = function() {
         tabs.innerHTML += `<li><a onclick="channel('${roomid}')">${username}</a></li>`;
     };
 
-    channel = function(roomid) {
+    channel = function (roomid) {
         var frames = document.getElementsByClassName("ChannelView");
         var length = frames.length;
         for (var i = 0; i < length; i++) {
@@ -58,7 +45,7 @@ window.onload = function() {
         }
     }
 
-    socket.onmessage = function(event) {
+    socket.onmessage = function (event) {
         var msg = JSON.parse(event.data);
         console.log(event.data)
 

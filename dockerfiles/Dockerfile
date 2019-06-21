@@ -1,8 +1,7 @@
-# FROM yobasystems/alpine-postgres:latest
-# MAINTAINER Alex
+FROM golang:1.12
+MAINTAINER Alex
 
-# ENV POSTGRES_PASSWORD 1234
-# VOLUME /dbdump
-# EXPOSE 5432
-
-# https://hub.docker.com/r/yobasystems/alpine-postgres/
+ENV GOROOT /usr/local/go
+ENV GOPATH /hayatv
+VOLUME /hayatv
+EXPOSE 8000

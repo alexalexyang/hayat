@@ -7,7 +7,7 @@ import (
 	"html/template"
 	"net/http"
 	"time"
-
+	"net/http/httputil"
 	"github.com/alexalexyang/hayat/config"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -103,6 +103,13 @@ func ClientListHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ClientListWSHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Clientlist WS: I got a request.")
+	requestDump, err := httputil.DumpRequest(r, true)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(string(requestDump))
+
 	consultantCookie, err := r.Cookie("consultant")
 	if err != nil {
 		check(err)
