@@ -29,6 +29,7 @@ A consultant must first register as an organisation at /register/org. The first 
 The manager can then invite other consultants to join at /invite. Here, the manager can choose to make other consultants managers or staff. Managers get to delete the whole organisation, other managers, and staff.
 
 **SEB, FOR THE PURPOSES OF TESTING, PLEASE USE secret_key_here AS YOUR ORGANISATION**
+**Or just /login with email: alexalexyang@gmail.com and password: 1234**
 
 ### Clientlist page
 
@@ -47,15 +48,27 @@ Note:
 
 This is a young project being built by one person with a lot of other pressing matters to deal with so there are flaws. In particular:
 
-- Because this is a testing phase, I may regularly delete the site and its database, which means you will have to register again.
-- Please set a strong and unique password for yourself because I haven't enforced password best practices yet.
+- Because this is a testing phase, I will regularly delete the site and its database, which means you will have to register again.
 - If a client disconnects from a chat before a consultant enters, the chat will still show on the clientlist until a consultant clicks into it. So, consultants may sometimes see an empty room.
 - I didn't think to add a separate section on the page for the client profile. I'll figure this out later.
 - If you accidentally reload your page, all chats are lost. Another thing for me to think about.
 - This is not a stable product yet. It will probably take anywhere between now and 2021 to become truly usable and secure unless I get an injection of $$$.
 
 
-# Installation
+# Test goals
+
+- Test if users can:
+  - log in
+  - log out
+  - update account (pending)
+  - delete account
+  - change password (pending instructions)
+
+- Stability
+  - App should not crash
+  - Postgres and Docker should not break
+
+<!-- # Installation
 
 The program is in two parts:
 
@@ -71,7 +84,7 @@ There's no installation for the rest of the program. Register yourself as manage
 
 Once you register and log in, you can invite other members of your staff to join at /invite. Set whether or not the invitee should be Manager or Staff. An email with a one-time-only link to a registration page will be emailed to the invitee.
 
-Managers get to delete the entire organisation, including all staff. So, be careful.
+Managers get to delete the entire organisation, including all staff. So, be careful. -->
 
 
 # Todos
@@ -79,6 +92,7 @@ Managers get to delete the entire organisation, including all staff. So, be care
 ## Priority
 - Add heartbeat to keep chats alive.
 - Figure out how to tell the difference between an empty chatroom and if users are just being quiet.
+- Write errors to log.
 
 ## UX
 - Add navbar/links to essential pages.
