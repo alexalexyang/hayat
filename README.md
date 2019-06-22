@@ -33,9 +33,9 @@ The manager can then invite other consultants to join at /invite. Here, the mana
 
 ### Clientlist page
 
-After registration, log in at /login.
+After registration, log in at /login. Once logged in, the consultant is brought to the /clientlist page. You'll see a completely blank page. This is normal.
 
-Once logged in, the consultant is brought to the /clientlist page. Whenever clients start a chat, their username will appear on this page. Clicking it will not seem to do anything other than move the name a little bit. Clicking it again will open their profile inside an embedded window.
+Whenever clients start a chat (from /anteroom), their username will appear on this page. Clicking it will not seem to do anything other than move the name a little bit. Clicking it again will open their profile inside an embedded window.
 
 Click "Chat now." after you're done reading their profile. Their chatroom will open in the same embedded window. If you have more than one client, they will be in different tabs.
 
