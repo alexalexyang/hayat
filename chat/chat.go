@@ -193,9 +193,19 @@ func (rg *Registry) ChatClientWSHandler(w http.ResponseWriter, r *http.Request) 
 	rg.chatBroker(&chatroom, ws, username, roomCookie.Value)
 }
 
+func Ping(ws *websocket.Conn) {
+	for {
+		if err := ws.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
+			return
+		}
+		time.Sleep(50 * time.Second)
+	}
+}
+
 func (rg *Registry) chatBroker(room *ChatroomStruct, ws *websocket.Conn, username string, roomid string) {
 	var msg Message
 	msg.Username = username
+	go Ping(ws)
 	for {
 		// Read in a new message as JSON and map it to a Message object
 		err := ws.ReadJSON(&msg)

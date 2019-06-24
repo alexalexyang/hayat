@@ -7,7 +7,7 @@ import (
 	"html/template"
 	"net/http"
 	"time"
-	"net/http/httputil"
+	"github.com/alexalexyang/hayat/chat"
 	"github.com/alexalexyang/hayat/config"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -39,7 +39,7 @@ func ClientListHandler(w http.ResponseWriter, r *http.Request) {
 	var username string
 	var organisation string
 	if r.Method != http.MethodPost {
-		t, err := template.ParseFiles("views/base.gohtml", "views/clientlist.gohtml")
+		t, err := template.ParseFiles("views/base.gohtml", "views/navbar.gohtml", "views/clientlist.gohtml")
 		check(err)
 
 		sessionCookie, err := r.Cookie("SessionCookie")
@@ -103,12 +103,6 @@ func ClientListHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ClientListWSHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Clientlist WS: I got a request.")
-	requestDump, err := httputil.DumpRequest(r, true)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(string(requestDump))
 
 	consultantCookie, err := r.Cookie("consultant")
 	if err != nil {
@@ -141,7 +135,7 @@ func ClientListWSHandler(w http.ResponseWriter, r *http.Request) {
 	defer ws.Close()
 
 	ws.WriteJSON(serviceSlice)
-
+	go chat.Ping(ws)
 	Listen(ws, organisation)
 }
 
@@ -151,7 +145,7 @@ func ClientProfileHandler(w http.ResponseWriter, r *http.Request) {
 		check(err)
 		return
 	}
-	t, err := template.ParseFiles("views/base.gohtml", "views/clientprofile.gohtml")
+	t, err := template.ParseFiles("views/base.gohtml", "views/navbar.gohtml", "views/clientprofile.gohtml")
 	check(err)
 
 	params := mux.Vars(r)
@@ -200,8 +194,6 @@ func waitForNotification(l *pq.Listener, ws *websocket.Conn, organisation string
 			data := notBeingServed{}
 
 			_ = json.Unmarshal([]byte(n.Extra), &data)
-			fmt.Println("n.Extra:")
-			fmt.Println(n.Extra)
 			if organisation != data.Organisation {
 				return
 			}

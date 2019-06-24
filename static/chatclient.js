@@ -50,7 +50,6 @@ form.onsubmit = function (e) {
 
 socket.onmessage = function (event) {
     var msg = JSON.parse(event.data);
-    // console.log(event)
     listMsgs.innerHTML += '<li class="received">' + msg.username + ": " + msg.message + '</li>';
 };
 

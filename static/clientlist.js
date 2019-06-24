@@ -8,7 +8,7 @@ if (window.location.hostname == "localhost") {
     host = config["localhost"]
 } else {
     wsProtocol = config["wss"]
-    httpProtocol = config["http"]
+    httpProtocol = config["https"]
     host = config["host"]
 }
 
@@ -46,7 +46,6 @@ window.onload = function () {
 
     socket.onmessage = function (event) {
         var msg = JSON.parse(event.data);
-        console.log(event.data)
 
         for (let i = 0; i < msg.length; i++) {
             if (msg[i].beingserved == false) {
