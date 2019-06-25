@@ -45,6 +45,7 @@ type ChatroomStruct struct {
 type Message struct {
 	Username string `json:"username"`
 	Message  string `json:"message"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 var upgrader = websocket.Upgrader{
@@ -209,6 +210,16 @@ func (rg *Registry) chatBroker(room *ChatroomStruct, ws *websocket.Conn, usernam
 	for {
 		// Read in a new message as JSON and map it to a Message object
 		err := ws.ReadJSON(&msg)
+
+		// Save message to database.
+		db, err := sql.Open(config.DBType, config.DBconfig)
+		check(err)
+		defer db.Close()
+
+		statement := `INSERT INTO messages (timestamptz, roomid, username, message)
+		VALUES ($1, $2, $3, $4);`
+		_, err = db.Exec(statement, time.Now(), roomid, username, msg.Message)
+
 		if err != nil {
 			log.Printf("error: %v", err)
 			delete(room.Clients, ws)

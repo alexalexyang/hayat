@@ -35,6 +35,15 @@ func DBSetup() {
 	_, err = db.Exec(statement)
 	check(err)
 
+	statement = `CREATE TABLE IF NOT EXISTS messages (
+		timestamptz TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+		roomid TEXT,
+		username TEXT,
+		message TEXT
+		);`
+	_, err = db.Exec(statement)
+	check(err)
+
 	// // Customer table.
 	// statement = `CREATE TABLE IF NOT EXISTS consultants (
 	// 	firstname TEXT,
