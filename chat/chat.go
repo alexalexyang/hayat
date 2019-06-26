@@ -203,22 +203,26 @@ func Ping(ws *websocket.Conn) {
 	}
 }
 
+func saveMsg(db *sql.DB, roomid string, username string, message string) {
+	statement := `INSERT INTO messages (timestamptz, roomid, username, message)
+	VALUES ($1, $2, $3, $4);`
+	_, err := db.Exec(statement, time.Now(), roomid, username, message)
+	check(err)
+}
+
 func (rg *Registry) chatBroker(room *ChatroomStruct, ws *websocket.Conn, username string, roomid string) {
 	var msg Message
 	msg.Username = username
 	go Ping(ws)
+	counter := 0
+
+	db, err := sql.Open(config.DBType, config.DBconfig)
+	check(err)
+	defer db.Close()
 	for {
+		fmt.Println(counter)
 		// Read in a new message as JSON and map it to a Message object
 		err := ws.ReadJSON(&msg)
-
-		// Save message to database.
-		db, err := sql.Open(config.DBType, config.DBconfig)
-		check(err)
-		defer db.Close()
-
-		statement := `INSERT INTO messages (timestamptz, roomid, username, message)
-		VALUES ($1, $2, $3, $4);`
-		_, err = db.Exec(statement, time.Now(), roomid, username, msg.Message)
 
 		if err != nil {
 			log.Printf("error: %v", err)
@@ -234,8 +238,8 @@ func (rg *Registry) chatBroker(room *ChatroomStruct, ws *websocket.Conn, usernam
 				check(err)
 
 				delete(rg.Rooms, room.ID)
+				break
 			}
-			break
 		}
 		// Send the newly received message to the broadcast channel
 		for client := range room.Clients {
@@ -253,10 +257,13 @@ func (rg *Registry) chatBroker(room *ChatroomStruct, ws *websocket.Conn, usernam
 					check(err)
 
 					delete(rg.Rooms, room.ID)
+					break
 				}
-				break
 			}
 		}
+				// Save message to database.
+				saveMsg(db, roomid, username, msg.Message)
+				counter++
 	}
 }
 
