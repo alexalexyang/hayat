@@ -172,13 +172,8 @@ func (rg *Registry) ChatClientWSHandler(w http.ResponseWriter, r *http.Request) 
 	roomCookie, err := r.Cookie("clientroom")
 	check(err)
 
-	// Update emptysince with 6 hours in case this is a reconnect. Also limits new chats to 6 hours.
-	statement := `UPDATE rooms SET emptysince = $1 WHERE roomid = $2;`
-	_, err = db.Exec(statement, time.Now().Add(6*time.Hour), roomCookie.Value)
-	check(err)
-
 	// Use cookie to get client's name from their profile.
-	statement = `SELECT username from rooms WHERE roomid = $1;`
+	statement := `SELECT username from rooms WHERE roomid = $1;`
 	row := db.QueryRow(statement, roomCookie.Value)
 	var username string
 	row.Scan(&username)
