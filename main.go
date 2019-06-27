@@ -8,7 +8,7 @@ import (
 	"github.com/alexalexyang/hayat/auth"
 
 	"github.com/alexalexyang/hayat/chat"
-	"github.com/alexalexyang/hayat/chat/clientlist"
+	"github.com/alexalexyang/hayat/chat/dashboard"
 	"github.com/alexalexyang/hayat/config"
 	"github.com/alexalexyang/hayat/models"
 	"github.com/gorilla/mux"
@@ -44,10 +44,10 @@ func initRouter(rg *chat.Registry) *mux.Router {
 	router.HandleFunc("/chatclientws/{id:[\\w\\-]+}", rg.ChatClientWSHandler)
 	router.HandleFunc("/chatclient/{id:[\\w\\-]+}", chat.ChatClientHandler)
 
-	// Clientlist
-	router.HandleFunc("/clientlistws", clientlist.ClientListWSHandler)
-	router.HandleFunc("/clientlist", clientlist.ClientListHandler)
-	router.HandleFunc("/clientprofile/{id:[\\w\\-]+}", clientlist.ClientProfileHandler)
+	// Dashboard
+	router.HandleFunc("/dashboardws", dashboard.DashboardWSHandler)
+	router.HandleFunc("/dashboard", dashboard.DashboardHandler)
+	router.HandleFunc("/clientprofile/{id:[\\w\\-]+}", dashboard.ClientProfileHandler)
 
 	// Auth
 	router.HandleFunc("/register/org", auth.RegisterOrgHandler)

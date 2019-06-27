@@ -168,7 +168,6 @@ func (rg *Registry) ChatClientWSHandler(w http.ResponseWriter, r *http.Request) 
 	db, err := sql.Open(config.DBType, config.DBconfig)
 	check(err)
 	defer db.Close()
-
 	roomCookie, err := r.Cookie("clientroom")
 	check(err)
 

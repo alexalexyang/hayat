@@ -1,4 +1,4 @@
-package clientlist
+package dashboard
 
 import (
 	"database/sql"
@@ -35,11 +35,11 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func ClientListHandler(w http.ResponseWriter, r *http.Request) {
+func DashboardHandler(w http.ResponseWriter, r *http.Request) {
 	var username string
 	var organisation string
 	if r.Method != http.MethodPost {
-		t, err := template.ParseFiles("views/base.gohtml", "views/navbar.gohtml", "views/clientlist.gohtml")
+		t, err := template.ParseFiles("views/base.gohtml", "views/navbar.gohtml", "views/dashboard.gohtml")
 		check(err)
 
 		sessionCookie, err := r.Cookie("SessionCookie")
@@ -102,7 +102,7 @@ func ClientListHandler(w http.ResponseWriter, r *http.Request) {
 	check(err)
 }
 
-func ClientListWSHandler(w http.ResponseWriter, r *http.Request) {
+func DashboardWSHandler(w http.ResponseWriter, r *http.Request) {
 
 	consultantCookie, err := r.Cookie("consultant")
 	if err != nil {

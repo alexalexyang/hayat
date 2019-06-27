@@ -1,6 +1,6 @@
-var httpProtocol
-var wsProtocol
-var host
+let httpProtocol
+let wsProtocol
+let host
 
 if (window.location.hostname == "localhost") {
     wsProtocol = config["ws"]
@@ -13,11 +13,11 @@ if (window.location.hostname == "localhost") {
 }
 
 window.onload = function () {
-    var socket = new WebSocket(`${wsProtocol}${host}/clientlistws`);
-    var listRooms = document.getElementById('room');
-    var inputRoom = document.getElementById('inputRoom');
-    var chats = document.getElementById('chat');
-    var tabs = document.getElementById('tab');
+    let socket = new WebSocket(`${wsProtocol}${host}/dashboardws`);
+    let listRooms = document.getElementById('room');
+    let inputRoom = document.getElementById('inputRoom');
+    let chats = document.getElementById('chat');
+    let tabs = document.getElementById('tab');
 
     socket.onopen = function (event) {
         console.log("Open")
@@ -35,9 +35,9 @@ window.onload = function () {
     };
 
     channel = function (roomid) {
-        var frames = document.getElementsByClassName("ChannelView");
-        var length = frames.length;
-        for (var i = 0; i < length; i++) {
+        let frames = document.getElementsByClassName("ChannelView");
+        let length = frames.length;
+        for (let i = 0; i < length; i++) {
             if (frames[i].id == ("viewer" + roomid)) {
                 frames[i].style.display = "inline";
             } else { frames[i].style.display = "none"; }
@@ -45,12 +45,12 @@ window.onload = function () {
     }
 
     socket.onmessage = function (event) {
-        var msg = JSON.parse(event.data);
+        let msg = JSON.parse(event.data);
 
         for (let i = 0; i < msg.length; i++) {
             if (msg[i].beingserved == false) {
-                var roomid = msg[i].roomid
-                var username = msg[i].username
+                let roomid = msg[i].roomid
+                let username = msg[i].username
                 listRooms.innerHTML += `<li id=${roomid} onclick="submitter('${roomid}', '${username}')">${username}</li>`;
             } else {
                 document.getElementById(msg[i].roomid).remove();

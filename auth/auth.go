@@ -98,7 +98,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Redirect to dashboard.
-	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/clientlist", http.StatusSeeOther)
+	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/dashboard", http.StatusSeeOther)
 }
 
 func RegisterOrgHandler(w http.ResponseWriter, r *http.Request) {
@@ -137,7 +137,7 @@ func InviteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Redirect to dashboard.
-	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/clientlist", http.StatusSeeOther)
+	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/dashboard", http.StatusSeeOther)
 }
 
 func UpdateHandler(w http.ResponseWriter, r *http.Request) {
@@ -155,5 +155,5 @@ func UpdateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Redirect to dashboard.
-	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/clientlist", http.StatusSeeOther)
+	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/dashboard", http.StatusSeeOther)
 }
