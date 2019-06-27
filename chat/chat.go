@@ -130,6 +130,7 @@ func (rg *Registry) ChatRoomMaker(chatroomID *string, ws *websocket.Conn) Chatro
 	var Chatroom ChatroomStruct
 	Chatroom.Clients = make(map[*websocket.Conn]bool)
 	Chatroom.Clients[ws] = true
+	Chatroom.ID = *chatroomID
 	rg.Rooms[*chatroomID] = Chatroom
 	return Chatroom
 }
@@ -140,7 +141,7 @@ func (r *Registry) getRoom(roomid string) ChatroomStruct {
 
 func (rg *Registry) ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	urlid := params["id"]
+	roomid := params["id"]
 	cookies := r.Cookies()
 	cookieMap := make(map[string]string)
 	for _, cookie := range cookies {
@@ -148,15 +149,15 @@ func (rg *Registry) ChatClientWSHandler(w http.ResponseWriter, r *http.Request) 
 	}
 	
 	if _, ok := cookieMap["consultant"]; ok {
-		if _, ok := rg.Rooms[urlid]; ok {
-			room := rg.getRoom(urlid)
+		if _, ok := rg.Rooms[roomid]; ok {
+			room := rg.getRoom(roomid)
 
 			ws, err := upgrader.Upgrade(w, r, nil)
 			check(err)
 			defer ws.Close()
 			room.Clients[ws] = true
 
-			rg.chatBroker(&room, ws, cookieMap["consultantName"], urlid)
+			rg.chatBroker(&room, ws, cookieMap["consultantName"])
 		}
 		return
 	}
@@ -183,15 +184,34 @@ func (rg *Registry) ChatClientWSHandler(w http.ResponseWriter, r *http.Request) 
 	row.Scan(&username)
 	// Check if user was already in a room and just reconnecting now.
 	if _, ok := rg.Rooms[roomCookie.Value]; ok {
-		room := rg.getRoom(urlid)
+		room := rg.getRoom(roomid)
 		fmt.Println("Reconnecting.")
 		room.Clients[ws] = true
-		rg.chatBroker(&room, ws, username, roomCookie.Value)
+
+
+		payload := []Message{}
+		statement := `SELECT username, message FROM messages WHERE roomid=$1;`
+		rows, err := db.Query(statement, roomid)
+		check(err)
+	
+		for rows.Next() {
+			var savedName string
+			var savedMsg string
+			err = rows.Scan(&savedName, &savedMsg)
+			check(err)
+			msg := Message{
+				Username: savedName,
+				Message: savedMsg,
+			}
+			payload = append(payload, msg)
+		}
+		ws.WriteJSON(payload)
+		rg.chatBroker(&room, ws, username)
 		return
 	}
 	// Create a chatroom.
 	chatroom := rg.ChatRoomMaker(&roomCookie.Value, ws)
-	rg.chatBroker(&chatroom, ws, username, roomCookie.Value)
+	rg.chatBroker(&chatroom, ws, username)
 }
 
 func Ping(ws *websocket.Conn) {
@@ -203,67 +223,54 @@ func Ping(ws *websocket.Conn) {
 	}
 }
 
-func saveMsg(db *sql.DB, roomid string, username string, message string) {
-	statement := `INSERT INTO messages (timestamptz, roomid, username, message)
-	VALUES ($1, $2, $3, $4);`
-	_, err := db.Exec(statement, time.Now(), roomid, username, message)
-	check(err)
-}
-
-func (rg *Registry) chatBroker(room *ChatroomStruct, ws *websocket.Conn, username string, roomid string) {
-	var msg Message
-	msg.Username = username
-	go Ping(ws)
-	counter := 0
-
+func saveMsg(roomid string, username string, message string) {
 	db, err := sql.Open(config.DBType, config.DBconfig)
 	check(err)
 	defer db.Close()
+	statement := `INSERT INTO messages (timestamptz, roomid, username, message)
+	VALUES ($1, $2, $3, $4);`
+	_, err = db.Exec(statement, time.Now(), roomid, username, message)
+	check(err)
+}
+
+// Update room emptysince field in database so cleanup can delete after an hour.
+func setEmpty(roomid string) {
+	db, err := sql.Open(config.DBType, config.DBconfig)
+	check(err)
+	defer db.Close()
+	statement := `UPDATE rooms SET emptysince = $1 WHERE roomid = $2;`
+	_, err = db.Exec(statement, time.Now(), roomid)
+	check(err)
+}
+
+func (rg *Registry) chatBroker(room *ChatroomStruct, ws *websocket.Conn, username string) {
+	var msg Message
+	msg.Username = username
+	go Ping(ws)
 	for {
-		fmt.Println(counter)
 		// Read in a new message as JSON and map it to a Message object
 		err := ws.ReadJSON(&msg)
 
 		if err != nil {
 			log.Printf("error: %v", err)
 			delete(room.Clients, ws)
-
-			// Set EmptySince to time.Now() so that cleanUpRooms() can delete the room in a couple of hours.
-			if len(room.Clients) == 0 {
-				db, err := sql.Open(config.DBType, config.DBconfig)
-				check(err)
-				defer db.Close()
-				statement := `UPDATE rooms SET emptysince = $1 WHERE roomid = $2;`
-				_, err = db.Exec(statement, time.Now(), roomid)
-				check(err)
-
-				delete(rg.Rooms, room.ID)
-				break
-			}
+			setEmpty(room.ID)
+			return
 		}
 		// Send the newly received message to the broadcast channel
 		for client := range room.Clients {
-			err := client.WriteJSON(msg)
+			payload := []Message{msg}
+			err := client.WriteJSON(payload)
 			if err != nil {
 				log.Printf("error: %v", err)
 				client.Close()
 				delete(room.Clients, ws)
-				if len(room.Clients) == 0 {
-					db, err := sql.Open(config.DBType, config.DBconfig)
-					check(err)
-					defer db.Close()
-					statement := `UPDATE rooms SET emptysince = $1 WHERE roomid = $2;`
-					_, err = db.Exec(statement, time.Now(), roomid)
-					check(err)
-
-					delete(rg.Rooms, room.ID)
-					break
-				}
+				setEmpty(room.ID)
+				return
 			}
 		}
 				// Save message to database.
-				saveMsg(db, roomid, username, msg.Message)
-				counter++
+				saveMsg(room.ID, username, msg.Message)
 	}
 }
 
@@ -308,6 +315,8 @@ func (r *Registry) CleanUpRooms() {
 					statement := `DELETE FROM rooms WHERE roomid=$1;`
 					_, err = db.Exec(statement, room)
 					check(err)
+
+					delete(r.Rooms, room)
 				}
 			}
 		}

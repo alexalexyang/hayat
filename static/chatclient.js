@@ -1,5 +1,5 @@
-var protocol
-var host
+let protocol
+let host
 
 if (window.location.hostname == "localhost") {
     protocol = config["ws"]
@@ -10,15 +10,17 @@ if (window.location.hostname == "localhost") {
 }
 
 
-var pathname = document.location.pathname.split("/")[2];
-var form = document.getElementById('form-msg');
-var txtMsg = document.getElementById('msg');
-var listMsgs = document.getElementById('msgs');
-var socketStatus = document.getElementById('status');
-var btnClose = document.getElementById('close');
+let pathname = document.location.pathname.split("/")[2];
+let form = document.getElementById('form-msg');
+let txtMsg = document.getElementById('msg');
+let listMsgs = document.getElementById('msgs');
+let socketStatus = document.getElementById('status');
+let btnClose = document.getElementById('close');
+let chatname = "my chatname"
+console.log(chatname)
 
 console.log(`${protocol}${host}/chatclientws/${pathname}`)
-var socket = new WebSocket(`${protocol}${host}/chatclientws/${pathname}`);
+let socket = new WebSocket(`${protocol}${host}/chatclientws/${pathname}`);
 socket.onopen = function (event) {
     // socketStatus.innerHTML = 'Connected to: ' + event.currentTarget.url;
     socketStatus.innerHTML = ''
@@ -31,13 +33,13 @@ socket.onerror = function (error) {
 
 form.onsubmit = function (e) {
     e.preventDefault();
-
+    console.log("Sending")
     const myObj = {
         message: txtMsg.value
     };
 
     // Recovering the message of the textarea.
-    var msg = JSON.stringify(myObj);
+    let msg = JSON.stringify(myObj);
 
     // Sending the msg via WebSocket.
     socket.send(msg);
@@ -49,8 +51,15 @@ form.onsubmit = function (e) {
 };
 
 socket.onmessage = function (event) {
-    var msg = JSON.parse(event.data);
-    listMsgs.innerHTML += '<li class="received">' + msg.username + ": " + msg.message + '</li>';
+    let msg = JSON.parse(event.data);
+    console.log(msg)
+    console.log(chatname)
+    chatname = msg[0].username
+    console.log(chatname)
+    for (i = 0; i < msg.length; i++) {
+        listMsgs.innerHTML += `<li class="received">${msg[i].username}: ${msg[i].message}</li>`;
+    }
+    // listMsgs.innerHTML += `<li class="received">${msg.username}: ${msg.message}</li>`;
 };
 
 socket.onclose = function (event) {
