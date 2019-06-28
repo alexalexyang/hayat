@@ -106,6 +106,9 @@ func AnteroomHandler(w http.ResponseWriter, r *http.Request) {
 	roomID := uuid.Must(uuid.NewV4()).String()
 	CookieSetter(w, "clientroom", roomID, "/chatclientws/"+roomID)
 
+	// Set client username as cookie so we can use it set up the chatBroker in the chatroom.
+	CookieSetter(w, "clientusername", username, "/chatclientws/"+roomID)
+
 	// Add anteroomValues to db.
 	db, err := sql.Open(config.DBType, config.DBconfig)
 	check(err)
@@ -126,86 +129,91 @@ func ChatClientHandler(w http.ResponseWriter, r *http.Request) {
 	t.ExecuteTemplate(w, "base", nil)
 }
 
-func (rg *Registry) ChatRoomMaker(chatroomID *string, ws *websocket.Conn) ChatroomStruct {
+func (rg *Registry) makeChatroom(chatroomID *string) ChatroomStruct {
 	var Chatroom ChatroomStruct
 	Chatroom.Clients = make(map[*websocket.Conn]bool)
-	Chatroom.Clients[ws] = true
 	Chatroom.ID = *chatroomID
-	rg.Rooms[*chatroomID] = Chatroom
 	return Chatroom
 }
 
-func (r *Registry) getRoom(roomid string) ChatroomStruct {
-	return r.Rooms[roomid]
+func (rg *Registry) getRoom(roomid string) ChatroomStruct {
+	return rg.Rooms[roomid]
 }
 
 func (rg *Registry) ChatClientWSHandler(w http.ResponseWriter, r *http.Request) {
+	// Open db connection because we're going to use it a few times.
+	db, err := sql.Open(config.DBType, config.DBconfig)
+	check(err)
+	defer db.Close()
+
+	// Get the room ID from URL parameters.
 	params := mux.Vars(r)
 	roomid := params["id"]
+
+	// Get all cookies for the room
 	cookies := r.Cookies()
 	cookieMap := make(map[string]string)
 	for _, cookie := range cookies {
 		cookieMap[cookie.Name] = cookie.Value
 	}
-	
-	if _, ok := cookieMap["consultant"]; ok {
-		if _, ok := rg.Rooms[roomid]; ok {
-			room := rg.getRoom(roomid)
 
-			ws, err := upgrader.Upgrade(w, r, nil)
-			check(err)
-			defer ws.Close()
-			room.Clients[ws] = true
-
-			rg.chatBroker(&room, ws, cookieMap["consultantName"])
-		}
-		return
-	}
-	
+	// Upgrade connection so we can send chat history up if it exists.
 	ws, err := upgrader.Upgrade(w, r, nil)
 	check(err)
 	defer ws.Close()
-	db, err := sql.Open(config.DBType, config.DBconfig)
-	check(err)
-	defer db.Close()
-	roomCookie, err := r.Cookie("clientroom")
-	check(err)
 
-	// Use cookie to get client's name from their profile.
-	statement := `SELECT username from rooms WHERE roomid = $1;`
-	row := db.QueryRow(statement, roomCookie.Value)
-	var username string
-	row.Scan(&username)
-	// Check if user was already in a room and just reconnecting now.
-	if _, ok := rg.Rooms[roomCookie.Value]; ok {
-		room := rg.getRoom(roomid)
-		fmt.Println("Reconnecting.")
+
+	// Check database for chatroom. If exists, reload chat history.
+	statement := `SELECT username, message FROM messages WHERE roomid=$1;`
+	rows, err := db.Query(statement, roomid)
+	check(err)
+	defer rows.Close()
+
+	payload := []Message{}
+	for rows.Next() {
+		var savedName string
+		var savedMsg string
+		err = rows.Scan(&savedName, &savedMsg)
+		check(err)
+		msg := Message{
+			Username: savedName,
+			Message: savedMsg,
+		}
+		payload = append(payload, msg)
+	}
+
+	ws.WriteJSON(payload)
+
+	// Reconnect or is consultant.
+
+	if _, ok := rg.Rooms[roomid]; ok {
+		room := rg.Rooms[roomid]
+		fmt.Println("Reconnecting or is consultant.")
 		room.Clients[ws] = true
 
+		var username string
 
-		payload := []Message{}
-		statement := `SELECT username, message FROM messages WHERE roomid=$1;`
-		rows, err := db.Query(statement, roomid)
-		check(err)
-	
-		for rows.Next() {
-			var savedName string
-			var savedMsg string
-			err = rows.Scan(&savedName, &savedMsg)
-			check(err)
-			msg := Message{
-				Username: savedName,
-				Message: savedMsg,
-			}
-			payload = append(payload, msg)
+		if clientUsername, ok := cookieMap["clientusername"]; ok {
+			username = clientUsername
 		}
-		ws.WriteJSON(payload)
+		if consultantUsername, ok := cookieMap["consultantName"]; ok {
+			username = consultantUsername
+		}
+
 		rg.chatBroker(&room, ws, username)
-		return
 	}
-	// Create a chatroom.
-	chatroom := rg.ChatRoomMaker(&roomCookie.Value, ws)
-	rg.chatBroker(&chatroom, ws, username)
+
+	// Make the chatroom.
+	chatroom := rg.makeChatroom(&roomid)
+
+	// Register the room.
+	rg.Rooms[roomid] = chatroom
+	
+	// Add client to chatroom.
+	chatroom.Clients[ws] = true
+	
+	// Launch the chatBroker.
+	rg.chatBroker(&chatroom, ws, cookieMap["clientusername"])
 }
 
 func Ping(ws *websocket.Conn) {

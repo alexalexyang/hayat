@@ -23,7 +23,7 @@ func DBSetup() {
 	// Rooms table. roomid is for clientlist. token is to identify customer.
 	statement := `CREATE TABLE IF NOT EXISTS rooms (
 				timestamptz TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-				roomid TEXT UNIQUE,
+				roomid TEXT,
 				organisation TEXT,
 				username TEXT,
 				age TEXT,

@@ -38,67 +38,71 @@ var upgrader = websocket.Upgrader{
 func DashboardHandler(w http.ResponseWriter, r *http.Request) {
 	var username string
 	var organisation string
+
+	sessionCookie, err := r.Cookie("SessionCookie")
+	if err != nil {
+		check(err)
+		return
+	}
+
+	db, err := sql.Open(config.DBType, config.DBconfig)
+	check(err)
+	defer db.Close()
+
+	statement := `SELECT email FROM sessions WHERE cookie=$1;`
+	row := db.QueryRow(statement, sessionCookie.Value)
+	var email string
+	switch err := row.Scan(&email); err {
+	case sql.ErrNoRows:
+		fmt.Println("No row found.")
+	case nil:
+		// fmt.Println(email)
+	default:
+		check(err)
+	}
+
+	statement = `SELECT username, organisation FROM users WHERE email=$1;`
+	row = db.QueryRow(statement, email)
+	row.Scan(&username, &organisation)
+
+	consultantName := http.Cookie{
+		Name:  "consultantName",
+		Value: username,
+		// Expires:  time.Now().Add(time.Hour),
+		HttpOnly: true,
+		// Secure:   true,
+		// MaxAge:   50000,
+		Path: "/",
+	}
+	http.SetCookie(w, &consultantName)
+
+	organisationCookie := http.Cookie{
+		Name:  "organisation",
+		Value: organisation,
+		// Expires:  time.Now().Add(time.Hour),
+		HttpOnly: true,
+		// Secure:   true,
+		// MaxAge:   50000,
+		Path: "/",
+	}
+	http.SetCookie(w, &organisationCookie)
+
 	if r.Method != http.MethodPost {
 		t, err := template.ParseFiles("views/base.gohtml", "views/navbar.gohtml", "views/dashboard.gohtml")
 		check(err)
 
-		sessionCookie, err := r.Cookie("SessionCookie")
-		if err != nil {
-			check(err)
-			return
-		}
-
-		db, err := sql.Open(config.DBType, config.DBconfig)
-		check(err)
-		defer db.Close()
-
-		statement := `SELECT email FROM sessions WHERE cookie=$1;`
-		row := db.QueryRow(statement, sessionCookie.Value)
-		var email string
-		switch err := row.Scan(&email); err {
-		case sql.ErrNoRows:
-			fmt.Println("No row found.")
-		case nil:
-			// fmt.Println(email)
-		default:
-			check(err)
-		}
-
-		statement = `SELECT username, organisation FROM users WHERE email=$1;`
-		row = db.QueryRow(statement, email)
-		row.Scan(&username, &organisation)
-
-		consultantName := http.Cookie{
-			Name:  "consultantName",
-			Value: username,
-			// Expires:  time.Now().Add(time.Hour),
-			HttpOnly: true,
-			// Secure:   true,
-			// MaxAge:   50000,
-			Path: "/",
-		}
-		http.SetCookie(w, &consultantName)
-
-		consultantCookie := http.Cookie{
-			Name:  "consultant",
-			Value: organisation,
-			// Expires:  time.Now().Add(time.Hour),
-			HttpOnly: true,
-			// Secure:   true,
-			// MaxAge:   50000,
-			Path: "/",
-		}
-		http.SetCookie(w, &consultantCookie)
 		t.ExecuteTemplate(w, "base", nil)
 		return
 	}
 
 	roomid := r.FormValue("roomid")
-	db, err := sql.Open(config.DBType, config.DBconfig)
-	check(err)
-	defer db.Close()
-	statement := `UPDATE rooms SET beingserved = $1 WHERE roomid = $2;`
+	statement = `UPDATE rooms SET beingserved = $1 WHERE roomid = $2;`
 	_, err = db.Exec(statement, true, roomid)
+	check(err)
+
+	statement = `INSERT INTO rooms (timestamptz, roomid, username, organisation)
+	VALUES ($1, $2, $3, $4);`
+	_, err = db.Exec(statement, time.Now(), roomid, username, organisation)
 	check(err)
 }
 

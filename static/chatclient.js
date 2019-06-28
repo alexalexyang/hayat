@@ -16,8 +16,6 @@ let txtMsg = document.getElementById('msg');
 let listMsgs = document.getElementById('msgs');
 let socketStatus = document.getElementById('status');
 let btnClose = document.getElementById('close');
-let chatname = "my chatname"
-console.log(chatname)
 
 console.log(`${protocol}${host}/chatclientws/${pathname}`)
 let socket = new WebSocket(`${protocol}${host}/chatclientws/${pathname}`);
@@ -52,14 +50,10 @@ form.onsubmit = function (e) {
 
 socket.onmessage = function (event) {
     let msg = JSON.parse(event.data);
-    console.log(msg)
-    console.log(chatname)
-    chatname = msg[0].username
-    console.log(chatname)
+
     for (i = 0; i < msg.length; i++) {
         listMsgs.innerHTML += `<li class="received">${msg[i].username}: ${msg[i].message}</li>`;
     }
-    // listMsgs.innerHTML += `<li class="received">${msg.username}: ${msg.message}</li>`;
 };
 
 socket.onclose = function (event) {
