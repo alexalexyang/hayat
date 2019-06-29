@@ -90,25 +90,22 @@ Managers get to delete the entire organisation, including all staff. So, be care
 # Todos
 
 ## Priority
-- Add heartbeat to keep chats alive.
-- Figure out how to tell the difference between an empty chatroom and if users are just being quiet.
+- Remove Navbar from /clientprofile.
+- Add button to remove chat tab and close websocket.
+- Add separate div so consultant can continue to refer to client's profile.
+- Delete saved messages when cleaning up rooms.
 - Write errors to log.
 
 ## UX
-- Add navbar/links to essential pages.
-  - Show only links necessary to each user, eg: don't show login to consultant already logged in.
-- Add button to remove chat tab and close websocket.
-- Add separate div so consultant can continue to refer to client's profile.
+- Show only links necessary to each user, eg: don't show login to consultant already logged in.
 
 ## Clean-up
-- Delete saved messages when cleaning up rooms.
+
 - Add timestamp to ExplicitAuth sessions table.
   - Delete consultant session after X hours of inactivity.
 
 ## Persistence
 - Prioritise database over in-memory storage for persistence.
-- Reload all messages and chats in case user accidentally reloads page.
-- Save messages so they can be reloaded if connection breaks for whatever reason.
 
 ## Security
 - Consider session cookies rather than cookies, esp. using the Gorilla package.
