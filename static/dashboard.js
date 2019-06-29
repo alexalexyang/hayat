@@ -44,6 +44,13 @@ window.onload = function () {
         }
     }
 
+    closeChat = function (roomid) {
+        // document.getElementById("tab" + roomid).remove();
+        document.getElementById("viewer" + roomid).remove();
+        document.getElementById("li" + roomid).remove();
+        // Send signal down to delete room.
+    }
+
     socket.onmessage = function (event) {
         let msg = JSON.parse(event.data);
 
@@ -58,7 +65,7 @@ window.onload = function () {
 
             if (consultantName.length > 0) {
                 chats.insertAdjacentHTML('beforeend', `<iframe name="frame-${roomid}" id="viewer${roomid}" class="ChannelView" style="display:inline" src="${httpProtocol}${host}/chatclient/${roomid}"></iframe>`);
-                tabs.innerHTML += `<li><a onclick="channel('${roomid}')">${username}</a></li>`;
+                tabs.innerHTML += `<li id="li${roomid}"><a onclick="channel('${roomid}')">${username}</a><a onclick="closeChat('${roomid}')">_x</a></li>`;
             }
 
             if (msg[i].beingserved == false) {

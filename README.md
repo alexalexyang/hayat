@@ -90,7 +90,6 @@ Managers get to delete the entire organisation, including all staff. So, be care
 # Todos
 
 ## Priority
-- Remove Navbar from /clientprofile.
 - Add button to remove chat tab and close websocket.
 - Add separate div so consultant can continue to refer to client's profile.
 - Delete saved messages when cleaning up rooms.

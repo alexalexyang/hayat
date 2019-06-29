@@ -177,7 +177,7 @@ func ClientProfileHandler(w http.ResponseWriter, r *http.Request) {
 		check(err)
 		return
 	}
-	t, err := template.ParseFiles("views/base.gohtml", "views/navbar.gohtml", "views/clientprofile.gohtml")
+	t, err := template.ParseFiles("./views/clientprofile.gohtml")
 	check(err)
 
 	params := mux.Vars(r)
@@ -200,7 +200,7 @@ func ClientProfileHandler(w http.ResponseWriter, r *http.Request) {
 	row := db.QueryRow(statement, urlid)
 	row.Scan(&clientProfile.Username, &clientProfile.Age, &clientProfile.Gender, &clientProfile.Issues, &clientProfile.Roomid, &clientProfile.Organisation)
 
-	t.ExecuteTemplate(w, "base", clientProfile)
+	t.ExecuteTemplate(w, "clientprofile", clientProfile)
 }
 
 func Listen(ws *websocket.Conn, organisation string) {

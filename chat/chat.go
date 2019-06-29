@@ -123,10 +123,10 @@ func AnteroomHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ChatClientHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("./views/base.gohtml", "./views/navbar.gohtml", "./views/chatclient.gohtml")
+	t, err := template.ParseFiles("./views/chatclient.gohtml")
 	check(err)
 
-	t.ExecuteTemplate(w, "base", nil)
+	t.ExecuteTemplate(w, "chatclient", nil)
 }
 
 func (rg *Registry) makeChatroom(chatroomID *string) ChatroomStruct {
@@ -162,8 +162,6 @@ func (rg *Registry) ChatClientWSHandler(w http.ResponseWriter, r *http.Request) 
 	ws, err := upgrader.Upgrade(w, r, nil)
 	check(err)
 	defer ws.Close()
-	fmt.Println("Memory location of ws: ", &ws)
-
 
 	// Check database for chatroom. If exists, reload chat history.
 	statement := `SELECT username, message FROM messages WHERE roomid=$1;`
@@ -191,7 +189,6 @@ func (rg *Registry) ChatClientWSHandler(w http.ResponseWriter, r *http.Request) 
 	if _, ok := rg.Rooms[roomid]; ok {
 	
 		room := rg.Rooms[roomid]
-		fmt.Println("Reconnecting or is consultant.")
 		room.Clients[ws] = true
 
 		var username string
