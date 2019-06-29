@@ -26,10 +26,12 @@ func DBSetup() {
 				roomid TEXT,
 				organisation TEXT,
 				username TEXT,
+				role TEXT,
 				age TEXT,
 				gender TEXT,
 				issues TEXT,
 				beingserved bool,
+				servedby TEXT,
 				emptysince TIMESTAMPTZ
 				);`
 	_, err = db.Exec(statement)
@@ -79,7 +81,8 @@ func DBSetup() {
 		  select NEW.roomid,
 				 NEW.beingserved,
 				 NEW.username,
-				 NEW.organisation
+				 NEW.organisation,
+				 NEW.role
 		)
 		select pg_notify('events', row_to_json(payload)::text)
 		  from payload

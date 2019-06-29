@@ -47,14 +47,29 @@ window.onload = function () {
     socket.onmessage = function (event) {
         let msg = JSON.parse(event.data);
 
+        if (msg == null) {
+            return
+        }
+
         for (let i = 0; i < msg.length; i++) {
+            let roomid = msg[i].roomid;
+            let username = msg[i].username;
+            let consultantName = msg[i].servedby;
+
+            if (consultantName.length > 0) {
+                chats.insertAdjacentHTML('beforeend', `<iframe name="frame-${roomid}" id="viewer${roomid}" class="ChannelView" style="display:inline" src="${httpProtocol}${host}/chatclient/${roomid}"></iframe>`);
+                tabs.innerHTML += `<li><a onclick="channel('${roomid}')">${username}</a></li>`;
+            }
+
             if (msg[i].beingserved == false) {
-                let roomid = msg[i].roomid
-                let username = msg[i].username
                 listRooms.innerHTML += `<li id=${roomid} onclick="submitter('${roomid}', '${username}')">${username}</li>`;
             } else {
-                document.getElementById(msg[i].roomid).remove();
-            };
+                let elem = document.getElementById(msg[i].roomid)
+                if (elem != null) {
+                    elem.remove();
+                }
+            }
         };
+
     };
 };

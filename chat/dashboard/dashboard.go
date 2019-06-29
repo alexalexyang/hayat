@@ -22,9 +22,11 @@ func check(err error) {
 
 type notBeingServed struct {
 	Roomid       string `json:"roomid"`
-	Beingserved  bool   `json:"beingserved"`
+	Beingserved  *bool   `json:"beingserved"`
+	Servedby     string `json:"servedby"`
 	Organisation string `json:"organisation"`
 	Username     string `json:"username"`
+	Role         string `json:"role"`
 }
 
 var upgrader = websocket.Upgrader{
@@ -96,55 +98,81 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	roomid := r.FormValue("roomid")
-	statement = `UPDATE rooms SET beingserved = $1 WHERE roomid = $2;`
-	_, err = db.Exec(statement, true, roomid)
+	statement = `UPDATE rooms SET beingserved=$1, servedby=$2 WHERE roomid=$3;`
+	_, err = db.Exec(statement, true, username, roomid)
 	check(err)
 
-	statement = `INSERT INTO rooms (timestamptz, roomid, username, organisation)
-	VALUES ($1, $2, $3, $4);`
-	_, err = db.Exec(statement, time.Now(), roomid, username, organisation)
+	statement = `INSERT INTO rooms (timestamptz, roomid, username, organisation, role)
+	VALUES ($1, $2, $3, $4, $5);`
+	_, err = db.Exec(statement, time.Now(), roomid, username, organisation, "consultant")
 	check(err)
 }
 
 func DashboardWSHandler(w http.ResponseWriter, r *http.Request) {
 
-	consultantCookie, err := r.Cookie("consultant")
-	if err != nil {
-		check(err)
+	// Make a map of all globally available cookies.
+
+	cookies := r.Cookies()
+	cookieMap := make(map[string]string)
+	for _, cookie := range cookies {
+		cookieMap[cookie.Name] = cookie.Value
+	}
+
+	// Check if user is logged in.
+	if _, ok := cookieMap["SessionCookie"]; ok {
+	} else {
 		return
 	}
-	organisation := consultantCookie.Value
-	db, err := sql.Open(config.DBType, config.DBconfig)
-	check(err)
-	defer db.Close()
 
-	// Find by organisation too.
-	statement := `SELECT roomid, username FROM rooms WHERE beingserved='f' AND organisation=$1;`
-	rows, err := db.Query(statement, organisation)
-	check(err)
-	defer rows.Close()
-
-	var serviceSlice []notBeingServed
-
-	for rows.Next() {
-		serveme := notBeingServed{}
-		err = rows.Scan(&serveme.Roomid, &serveme.Username)
-		check(err)
-		serveme.Beingserved = false
-		serviceSlice = append(serviceSlice, serveme)
-	}
+	consultantName := cookieMap["consultantName"]
+	organisation := cookieMap["organisation"]
 
 	ws, err := upgrader.Upgrade(w, r, nil)
 	check(err)
 	defer ws.Close()
 
-	ws.WriteJSON(serviceSlice)
+	db, err := sql.Open(config.DBType, config.DBconfig)
+	check(err)
+	defer db.Close()
+
+	// In case of reconnect, send up all clients currently being served by this consultant.
+	statement := `SELECT roomid, username, beingserved, servedby FROM rooms WHERE beingserved='t' AND servedby=$1;`
+	rows, err := db.Query(statement, consultantName)
+	check(err)
+	defer rows.Close()
+
+	var servingClients []notBeingServed
+
+	for rows.Next() {
+		myClients := notBeingServed{}
+		err = rows.Scan(&myClients.Roomid, &myClients.Username, &myClients.Beingserved, &myClients.Servedby)
+		check(err)
+		servingClients = append(servingClients, myClients)
+	}
+	ws.WriteJSON(servingClients)
+
+	// Send up all waiting clients of the organisation.
+	statement = `SELECT roomid, username, beingserved FROM rooms WHERE beingserved='f' AND organisation=$1;`
+	rows, err = db.Query(statement, organisation)
+	check(err)
+	defer rows.Close()
+
+	var unservedClients []notBeingServed
+
+	for rows.Next() {
+		serveme := notBeingServed{}
+		err = rows.Scan(&serveme.Roomid, &serveme.Username, &serveme.Beingserved)
+		check(err)
+		unservedClients = append(unservedClients, serveme)
+	}
+
+	ws.WriteJSON(unservedClients)
 	go chat.Ping(ws)
 	Listen(ws, organisation)
 }
 
 func ClientProfileHandler(w http.ResponseWriter, r *http.Request) {
-	_, err := r.Cookie("consultant")
+	_, err := r.Cookie("consultantName")
 	if err != nil {
 		check(err)
 		return
@@ -198,9 +226,17 @@ func waitForNotification(l *pq.Listener, ws *websocket.Conn, organisation string
 			data := notBeingServed{}
 
 			_ = json.Unmarshal([]byte(n.Extra), &data)
+
+			// Check if the client and the consultant are with the same organisation.
 			if organisation != data.Organisation {
 				return
 			}
+
+			// Prevents details from being sent to dashboard if it's a consultant.
+			if data.Role == "consultant" {
+				return
+			}
+			
 			payload := []notBeingServed{data}
 			ws.WriteJSON(payload)
 		case <-time.After(120 * time.Second):

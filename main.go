@@ -24,7 +24,7 @@ func main() {
 	models.DBSetup()
 
 	RoomsRegistry := chat.Registry{
-		Rooms: make(map[string]chat.ChatroomStruct),
+		Rooms: make(map[string]*chat.ChatroomStruct),
 	}
 
 	RoomsRegistry.Rebuild()
