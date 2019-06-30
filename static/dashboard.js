@@ -30,23 +30,11 @@ window.onload = function () {
     submitter = function (roomid, username) {
         document.clientlistForm.inputRoom.value = roomid;
         document.getElementById('clientlistForm').submit();
-        // chats.insertAdjacentHTML('beforeend', `<iframe name="frame-${roomid}" id="viewer${roomid}" class="ChannelView" style="display:none" src="${httpProtocol}${host}/clientprofile/${roomid}"></iframe>`);
-        // tabs.innerHTML += `<li><a onclick="channel('${roomid}')">${username}</a></li>`;
         chats.insertAdjacentHTML('beforeend', `<iframe id="tabcontent-${roomid}" class="tabcontent" style="display:none" src="${httpProtocol}${host}/clientprofile/${roomid}"></iframe>`);
-        tabs.innerHTML += `<button class="tablinks" onclick="openCity(event, '${roomid}')" id="">${username}</button>`;
+        tabs.innerHTML += `<button class="tablinks" onclick="showTab(event, '${roomid}')" id="tablink-${roomid}">${username} <a onclick="closeChat('${roomid}')">x</a></button>`;
     };
 
-    // channel = function (roomid) {
-    //     let frames = document.getElementsByClassName("ChannelView");
-    //     let length = frames.length;
-    //     for (let i = 0; i < length; i++) {
-    //         if (frames[i].id == ("viewer" + roomid)) {
-    //             frames[i].style.display = "inline";
-    //         } else { frames[i].style.display = "none"; }
-    //     }
-    // }
-
-    openCity = function (evt, roomid) {
+    showTab = function (evt, roomid) {
         var i, tabcontent, tablinks;
         tabcontent = document.getElementsByClassName("tabcontent");
         for (i = 0; i < tabcontent.length; i++) {
@@ -61,9 +49,8 @@ window.onload = function () {
     }
 
     closeChat = function (roomid) {
-        // document.getElementById("tab" + roomid).remove();
-        document.getElementById("viewer" + roomid).remove();
-        document.getElementById("li" + roomid).remove();
+        document.getElementById("tabcontent-" + roomid).remove();
+        document.getElementById("tablink-" + roomid).remove();
         // Send signal down to delete room.
     }
 
@@ -81,7 +68,8 @@ window.onload = function () {
 
             if (consultantName.length > 0) {
                 chats.insertAdjacentHTML('beforeend', `<iframe id="tabcontent-${roomid}" class="tabcontent" style="display:none" src="${httpProtocol}${host}/chatclient/${roomid}"></iframe>`);
-                tabs.innerHTML += `<button class="tablinks" onclick="openCity(event, '${roomid}')" id="">${username}</button>`;
+                tabs.innerHTML += `<button class="tablinks" onclick="showTab(event, '${roomid}')" id="tablink-${roomid}">${username} <a onclick="closeChat('${roomid}')">x</a></button>`;
+                document.getElementById(`tabcontent-${roomid}`).click();
             }
 
             if (msg[i].beingserved == false) {
