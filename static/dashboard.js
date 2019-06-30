@@ -16,8 +16,8 @@ window.onload = function () {
     let socket = new WebSocket(`${wsProtocol}${host}/dashboardws`);
     let listRooms = document.getElementById('room');
     let inputRoom = document.getElementById('inputRoom');
-    let chats = document.getElementById('chat');
-    let tabs = document.getElementById('tab');
+    let chats = document.getElementById('chats');
+    let tabs = document.getElementById('tabs');
 
     socket.onopen = function (event) {
         console.log("Open")
@@ -30,18 +30,34 @@ window.onload = function () {
     submitter = function (roomid, username) {
         document.clientlistForm.inputRoom.value = roomid;
         document.getElementById('clientlistForm').submit();
-        chats.insertAdjacentHTML('beforeend', `<iframe name="frame-${roomid}" id="viewer${roomid}" class="ChannelView" style="display:none" src="${httpProtocol}${host}/clientprofile/${roomid}"></iframe>`);
-        tabs.innerHTML += `<li><a onclick="channel('${roomid}')">${username}</a></li>`;
+        // chats.insertAdjacentHTML('beforeend', `<iframe name="frame-${roomid}" id="viewer${roomid}" class="ChannelView" style="display:none" src="${httpProtocol}${host}/clientprofile/${roomid}"></iframe>`);
+        // tabs.innerHTML += `<li><a onclick="channel('${roomid}')">${username}</a></li>`;
+        chats.insertAdjacentHTML('beforeend', `<iframe id="tabcontent-${roomid}" class="tabcontent" style="display:none" src="${httpProtocol}${host}/clientprofile/${roomid}"></iframe>`);
+        tabs.innerHTML += `<button class="tablinks" onclick="openCity(event, '${roomid}')" id="">${username}</button>`;
     };
 
-    channel = function (roomid) {
-        let frames = document.getElementsByClassName("ChannelView");
-        let length = frames.length;
-        for (let i = 0; i < length; i++) {
-            if (frames[i].id == ("viewer" + roomid)) {
-                frames[i].style.display = "inline";
-            } else { frames[i].style.display = "none"; }
+    // channel = function (roomid) {
+    //     let frames = document.getElementsByClassName("ChannelView");
+    //     let length = frames.length;
+    //     for (let i = 0; i < length; i++) {
+    //         if (frames[i].id == ("viewer" + roomid)) {
+    //             frames[i].style.display = "inline";
+    //         } else { frames[i].style.display = "none"; }
+    //     }
+    // }
+
+    openCity = function (evt, roomid) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
         }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById("tabcontent-" + roomid).style.display = "block";
+        evt.currentTarget.className += " active";
     }
 
     closeChat = function (roomid) {
@@ -64,8 +80,8 @@ window.onload = function () {
             let consultantName = msg[i].servedby;
 
             if (consultantName.length > 0) {
-                chats.insertAdjacentHTML('beforeend', `<iframe name="frame-${roomid}" id="viewer${roomid}" class="ChannelView" style="display:inline" src="${httpProtocol}${host}/chatclient/${roomid}"></iframe>`);
-                tabs.innerHTML += `<li id="li${roomid}"><a onclick="channel('${roomid}')">${username}</a><a onclick="closeChat('${roomid}')">_x</a></li>`;
+                chats.insertAdjacentHTML('beforeend', `<iframe id="tabcontent-${roomid}" class="tabcontent" style="display:none" src="${httpProtocol}${host}/chatclient/${roomid}"></iframe>`);
+                tabs.innerHTML += `<button class="tablinks" onclick="openCity(event, '${roomid}')" id="">${username}</button>`;
             }
 
             if (msg[i].beingserved == false) {
