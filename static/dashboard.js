@@ -49,9 +49,13 @@ window.onload = function () {
     }
 
     closeChat = function (roomid) {
-        document.getElementById("tabcontent-" + roomid).remove();
-        document.getElementById("tablink-" + roomid).remove();
-        // Send signal down to delete room.
+        let confirmClose = confirm("Are you sure you want to close this chat?")
+        if (confirmClose == true) {
+            document.getElementById("tabcontent-" + roomid).remove();
+            document.getElementById("tablink-" + roomid).remove();
+
+            // Send signal down to delete room.
+        }
     }
 
     socket.onmessage = function (event) {

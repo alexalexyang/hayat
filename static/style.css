@@ -7,6 +7,37 @@ html {
     padding-bottom: 15px;
 }
 
+/* NAVBAR */
+
+.navbar {
+  display: flex;
+  flex-direction: row;
+}
+
+.navbarleft {
+  /* border: 1px solid red; */
+  padding: 0px 10px;
+}
+
+.navbarright {
+  /* border: 1px solid green; */
+  text-align: right;
+}
+
+
+/* LANDING PAGE*/
+
+.landingpagelede {
+  display: flex;
+  align-items: center;
+  height: 50vh;
+  width: 100%;
+}
+
+#lede {
+  padding-left: 10%;
+}
+
 /* DASHBOARD */
 
 .closechat {

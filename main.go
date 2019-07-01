@@ -9,6 +9,7 @@ import (
 
 	"github.com/alexalexyang/hayat/chat"
 	"github.com/alexalexyang/hayat/chat/dashboard"
+	"github.com/alexalexyang/hayat/generic"
 	"github.com/alexalexyang/hayat/config"
 	"github.com/alexalexyang/hayat/models"
 	"github.com/gorilla/mux"
@@ -36,7 +37,7 @@ func main() {
 
 func initRouter(rg *chat.Registry) *mux.Router {
 	router := mux.NewRouter()
-	// router.PathPrefix("/views/").Handler(http.StripPrefix("/views/", http.FileServer(http.Dir("views"))))
+
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	router.HandleFunc("/anteroom", chat.AnteroomHandler)
 
@@ -59,6 +60,9 @@ func initRouter(rg *chat.Registry) *mux.Router {
 	router.HandleFunc("/forgotpw", auth.ForgotPwHandler)
 	router.HandleFunc("/changepw/{id:[\\w\\-]+}", auth.ChangePwHandler)
 	router.HandleFunc("/deleteaccount", auth.DeleteAccountHandler)
+
+	// Hayat pages
+	router.HandleFunc("/", generic.MainPageHandler)
 
 	return router
 }

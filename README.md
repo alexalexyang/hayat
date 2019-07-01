@@ -90,8 +90,8 @@ Managers get to delete the entire organisation, including all staff. So, be care
 # Todos
 
 ## Priority
-- Prettify button that removes chat tab and closes websocket.
 - Prettify navbar.
+- Add alert to confirm user wants to close chatroom permanently. Signal to backed to clear room and message details if yes.
 - Add separate div so consultant can continue to refer to client's profile.
 - Delete saved messages when cleaning up rooms.
 - Write errors to log.
@@ -140,3 +140,7 @@ https://stackoverflow.com/questions/17438253/access-struct-in-map-without-copyin
 ## How to have iframes in tabs
 
 https://howto.caspio.com/tech-tips-and-articles/advanced-customizations/create-embeddable-tabbed-interface/
+
+## Show different things on page depending on type of user.
+
+https://www.calhoun.io/intro-to-templates-p3-functions/

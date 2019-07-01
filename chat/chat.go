@@ -317,8 +317,10 @@ func (r *Registry) CleanUpRooms() {
 				row.Scan(&emptysince)
 				if time.Since(emptysince).Seconds() > 3600.00 {
 					delete(r.Rooms, room)
-					statement := `DELETE FROM rooms WHERE roomid=$1;
-								DELETE FROM messages WHERE roomid=$1;`
+					statement := `DELETE FROM rooms WHERE roomid=$1;`
+					_, err = db.Exec(statement, room)
+					check(err)
+					statement = `DELETE FROM messages WHERE roomid=$1;`
 					_, err = db.Exec(statement, room)
 					check(err)
 
