@@ -9,6 +9,10 @@ html {
 
 /* DASHBOARD */
 
+.closechat {
+  width: 15px;
+}
+
 .tabs {
     overflow: hidden;
     border: 1px solid #ccc;

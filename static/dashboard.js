@@ -31,7 +31,7 @@ window.onload = function () {
         document.clientlistForm.inputRoom.value = roomid;
         document.getElementById('clientlistForm').submit();
         chats.insertAdjacentHTML('beforeend', `<iframe id="tabcontent-${roomid}" class="tabcontent" style="display:none" src="${httpProtocol}${host}/clientprofile/${roomid}"></iframe>`);
-        tabs.innerHTML += `<button class="tablinks" onclick="showTab(event, '${roomid}')" id="tablink-${roomid}">${username} <a onclick="closeChat('${roomid}')">x</a></button>`;
+        tabs.innerHTML += `<button class="tablinks" onclick="showTab(event, '${roomid}')" id="tablink-${roomid}">${username} <img class="closechat" src="static/icons8-close-window-50.png" onclick="closeChat('${roomid}')"></button>`;
     };
 
     showTab = function (evt, roomid) {
@@ -68,7 +68,7 @@ window.onload = function () {
 
             if (consultantName.length > 0) {
                 chats.insertAdjacentHTML('beforeend', `<iframe id="tabcontent-${roomid}" class="tabcontent" style="display:none" src="${httpProtocol}${host}/chatclient/${roomid}"></iframe>`);
-                tabs.innerHTML += `<button class="tablinks" onclick="showTab(event, '${roomid}')" id="tablink-${roomid}">${username} <a onclick="closeChat('${roomid}')">x</a></button>`;
+                tabs.innerHTML += `<button class="tablinks" onclick="showTab(event, '${roomid}')" id="tablink-${roomid}">${username} <img class="closechat" src="static/icons8-close-window-50.png" onclick="closeChat('${roomid}')"></button>`;
                 document.getElementById(`tablink-${roomid}`).click();
             }
 
