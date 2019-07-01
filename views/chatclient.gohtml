@@ -1,15 +1,24 @@
 {{define "chatclient"}}
-	<div id="page-wrapper">
-		<h1>Chat</h1>
 
-		<div id="status">Connecting…</div>
+	<head>
+		<link rel="stylesheet" href="../static/style.css">
+	</head>
 
-		<ul id="msgs"></ul>
+	<div id="chatbox">
+		<div class="chatboxpart" id="chatmessages">
+			<h1>Chat</h1>
 
-		<form id="form-msg" action="#" method="post">
-			<input type="text" id="msg" placeholder="Write here." required></textarea>
-			<button type="submit">Send msg</button>
-		</form>
+			<div id="status">Connecting…</div>
+
+			<ul id="msgs"></ul>
+		</div>
+
+		<div class="chatboxpart" id="sendbox">
+			<form id="form-msg" action="#" method="post">
+				<input type="text" id="msg" placeholder="Write here." required>
+				<button id="sendboxbutton" type="submit">Send msg</button>
+			</form>
+		</div>
 	</div>
 
 	<script src="../static/config.js"></script>

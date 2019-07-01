@@ -44,7 +44,7 @@ window.onload = function () {
         for (i = 0; i < tablinks.length; i++) {
             tablinks[i].className = tablinks[i].className.replace(" active", "");
         }
-        document.getElementById("tabcontent-" + roomid).style.display = "block";
+        document.getElementById("tabcontent-" + roomid).style.display = "flex";
         evt.currentTarget.className += " active";
     }
 
@@ -69,7 +69,7 @@ window.onload = function () {
             if (consultantName.length > 0) {
                 chats.insertAdjacentHTML('beforeend', `<iframe id="tabcontent-${roomid}" class="tabcontent" style="display:none" src="${httpProtocol}${host}/chatclient/${roomid}"></iframe>`);
                 tabs.innerHTML += `<button class="tablinks" onclick="showTab(event, '${roomid}')" id="tablink-${roomid}">${username} <a onclick="closeChat('${roomid}')">x</a></button>`;
-                document.getElementById(`tabcontent-${roomid}`).click();
+                document.getElementById(`tablink-${roomid}`).click();
             }
 
             if (msg[i].beingserved == false) {

@@ -155,7 +155,6 @@ func (rg *Registry) ChatClientWSHandler(w http.ResponseWriter, r *http.Request) 
 	cookieMap := make(map[string]string)
 	for _, cookie := range cookies {
 		cookieMap[cookie.Name] = cookie.Value
-		fmt.Println("Cookie found:", cookie.Name)
 	}
 
 	// Upgrade connection so we can send chat history up if it exists.
@@ -318,7 +317,8 @@ func (r *Registry) CleanUpRooms() {
 				row.Scan(&emptysince)
 				if time.Since(emptysince).Seconds() > 3600.00 {
 					delete(r.Rooms, room)
-					statement := `DELETE FROM rooms WHERE roomid=$1;`
+					statement := `DELETE FROM rooms WHERE roomid=$1;
+								DELETE FROM messages WHERE roomid=$1;`
 					_, err = db.Exec(statement, room)
 					check(err)
 

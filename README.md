@@ -90,7 +90,8 @@ Managers get to delete the entire organisation, including all staff. So, be care
 # Todos
 
 ## Priority
-- Add button to remove chat tab and close websocket.
+- Prettify button that removes chat tab and closes websocket.
+- Prettify navbar.
 - Add separate div so consultant can continue to refer to client's profile.
 - Delete saved messages when cleaning up rooms.
 - Write errors to log.
