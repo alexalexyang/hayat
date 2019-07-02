@@ -72,7 +72,7 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request) {
 		Value: username,
 		// Expires:  time.Now().Add(time.Hour),
 		HttpOnly: true,
-		// Secure:   true,
+		Secure:   true,
 		// MaxAge:   50000,
 		Path: "/",
 	}
@@ -83,7 +83,7 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request) {
 		Value: organisation,
 		// Expires:  time.Now().Add(time.Hour),
 		HttpOnly: true,
-		// Secure:   true,
+		Secure:   true,
 		// MaxAge:   50000,
 		Path: "/",
 	}
@@ -94,6 +94,17 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request) {
 		check(err)
 
 		t.ExecuteTemplate(w, "base", nil)
+		return
+	}
+
+	deleteroom := r.FormValue("deleteroom")
+	if deleteroom != "0" {
+		statement = `DELETE FROM ROOMS WHERE roomid=$1;`
+		_, err = db.Exec(statement, deleteroom)
+		check(err)
+		statement = `DELETE FROM MESSAGES WHERE roomid=$1;`
+		_, err = db.Exec(statement, deleteroom)
+		check(err)
 		return
 	}
 

@@ -46,6 +46,7 @@ type Message struct {
 	Username string `json:"username"`
 	Message  string `json:"message"`
 	Timestamp time.Time `json:"timestamp"`
+	Type string `json:"type"`
 }
 
 var upgrader = websocket.Upgrader{
@@ -78,7 +79,7 @@ func CookieSetter(w http.ResponseWriter, cookieName string, encodedValue string,
 		Value: encodedValue,
 		// Expires:  time.Now().Add(time.Hour),
 		HttpOnly: true,
-		// Secure:   true,
+		Secure:   true,
 		// MaxAge:   50000,
 		Path: roomPath,
 	}
@@ -163,7 +164,7 @@ func (rg *Registry) ChatClientWSHandler(w http.ResponseWriter, r *http.Request) 
 	defer ws.Close()
 
 	// Check database for chatroom. If exists, reload chat history.
-	statement := `SELECT username, message FROM messages WHERE roomid=$1;`
+	statement := `SELECT username, message, type FROM messages WHERE roomid=$1;`
 	rows, err := db.Query(statement, roomid)
 	check(err)
 	defer rows.Close()
@@ -172,11 +173,13 @@ func (rg *Registry) ChatClientWSHandler(w http.ResponseWriter, r *http.Request) 
 	for rows.Next() {
 		var savedName string
 		var savedMsg string
-		err = rows.Scan(&savedName, &savedMsg)
+		var savedType string
+		err = rows.Scan(&savedName, &savedMsg, &savedType)
 		check(err)
 		msg := Message{
 			Username: savedName,
 			Message: savedMsg,
+			Type: savedType,
 		}
 		payload = append(payload, msg)
 	}
@@ -225,13 +228,13 @@ func Ping(ws *websocket.Conn) {
 	}
 }
 
-func saveMsg(roomid string, username string, message string) {
+func saveMsg(roomid string, msg Message) {
 	db, err := sql.Open(config.DBType, config.DBconfig)
 	check(err)
 	defer db.Close()
-	statement := `INSERT INTO messages (timestamptz, roomid, username, message)
-	VALUES ($1, $2, $3, $4);`
-	_, err = db.Exec(statement, time.Now(), roomid, username, message)
+	statement := `INSERT INTO messages (timestamptz, roomid, username, message, type)
+	VALUES ($1, $2, $3, $4, $5);`
+	_, err = db.Exec(statement, time.Now(), roomid, msg.Username, msg.Message, msg.Type)
 	check(err)
 }
 
@@ -248,6 +251,15 @@ func setEmpty(roomid string) {
 func (rg *Registry) chatBroker(room *ChatroomStruct, ws *websocket.Conn, username string) {
 	var msg Message
 	msg.Username = username
+	msg.Type = "open"
+	saveMsg(room.ID, msg)
+	payload := []Message{msg}
+	for client := range room.Clients {
+		err := client.WriteJSON(&payload)
+		check(err)
+		msg.Type = ""
+	}
+
 	go Ping(ws)
 
 	for {
@@ -257,6 +269,14 @@ func (rg *Registry) chatBroker(room *ChatroomStruct, ws *websocket.Conn, usernam
 
 		if err != nil {
 			log.Printf("error: %v", err)
+			msg.Type = "close"
+			payload = []Message{msg}
+			for client := range room.Clients {
+				err := client.WriteJSON(&payload)
+				check(err)
+			}
+			saveMsg(room.ID, msg)
+			ws.Close()
 			delete(room.Clients, ws)
 			setEmpty(room.ID)
 			return
@@ -264,18 +284,23 @@ func (rg *Registry) chatBroker(room *ChatroomStruct, ws *websocket.Conn, usernam
 
 		// Send the newly received message to the broadcast channel
 		for client := range room.Clients {
-			payload := []Message{msg}
+			payload = []Message{msg}
 			err := client.WriteJSON(payload)
 			if err != nil {
 				log.Printf("error: %v", err)
-				// client.Close()
+				msg.Type = "close"
+				payload := []Message{msg}
+				err := ws.WriteJSON(&payload)
+				check(err)
+				saveMsg(room.ID, msg)
+				ws.Close()
 				delete(room.Clients, ws)
 				setEmpty(room.ID)
 				return
 			}
 		}
-				// Save message to database.
-				saveMsg(room.ID, username, msg.Message)
+		// Save message to database.
+		saveMsg(room.ID, msg)
 	}
 }
 

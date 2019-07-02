@@ -90,14 +90,15 @@ Managers get to delete the entire organisation, including all staff. So, be care
 # Todos
 
 ## Priority
+- extend lifetime of all cookies, esp. consultant ones.
 - Prettify navbar.
-- Add alert to confirm user wants to close chatroom permanently. Signal to backed to clear room and message details if yes.
 - Add separate div so consultant can continue to refer to client's profile.
-- Delete saved messages when cleaning up rooms.
 - Write errors to log.
 
 ## UX
 - Show only links necessary to each user, eg: don't show login to consultant already logged in.
+- Have /dashboard listen on database table messages so that we can change tab name CSS on new messages.
+- Show only the first 200 lines, and then load all lines if user requests for it?
 
 ## Clean-up
 

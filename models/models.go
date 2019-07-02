@@ -41,7 +41,8 @@ func DBSetup() {
 		timestamptz TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 		roomid TEXT,
 		username TEXT,
-		message TEXT
+		message TEXT,
+		type TEXT
 		);`
 	_, err = db.Exec(statement)
 	check(err)

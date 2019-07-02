@@ -15,7 +15,6 @@ if (window.location.hostname == "localhost") {
 window.onload = function () {
     let socket = new WebSocket(`${wsProtocol}${host}/dashboardws`);
     let listRooms = document.getElementById('room');
-    let inputRoom = document.getElementById('inputRoom');
     let chats = document.getElementById('chats');
     let tabs = document.getElementById('tabs');
 
@@ -55,6 +54,8 @@ window.onload = function () {
             document.getElementById("tablink-" + roomid).remove();
 
             // Send signal down to delete room.
+            document.clientlistForm.deleteRoom.value = roomid;
+            document.getElementById('clientlistForm').submit();
         }
     }
 
@@ -70,12 +71,14 @@ window.onload = function () {
             let username = msg[i].username;
             let consultantName = msg[i].servedby;
 
+            // Show all clients that consultant is already serving.
             if (consultantName.length > 0) {
                 chats.insertAdjacentHTML('beforeend', `<iframe id="tabcontent-${roomid}" class="tabcontent" style="display:none" src="${httpProtocol}${host}/chatclient/${roomid}"></iframe>`);
                 tabs.innerHTML += `<button class="tablinks" onclick="showTab(event, '${roomid}')" id="tablink-${roomid}">${username} <img class="closechat" src="static/icons8-close-window-50.png" onclick="closeChat('${roomid}')"></button>`;
                 document.getElementById(`tablink-${roomid}`).click();
             }
 
+            // Show all clients of the organisation currently waiting to be served.
             if (msg[i].beingserved == false) {
                 listRooms.innerHTML += `<li id=${roomid} onclick="submitter('${roomid}', '${username}')">${username}</li>`;
             } else {

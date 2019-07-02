@@ -31,7 +31,6 @@ socket.onerror = function (error) {
 
 form.onsubmit = function (e) {
     e.preventDefault();
-    console.log("Sending")
     const myObj = {
         message: txtMsg.value
     };
@@ -50,10 +49,18 @@ form.onsubmit = function (e) {
 
 socket.onmessage = function (event) {
     let msg = JSON.parse(event.data);
-    console.log(msg)
-
+    // console.log(msg)
     for (i = 0; i < msg.length; i++) {
-        listMsgs.innerHTML += `<li class="received">${msg[i].username}: ${msg[i].message}</li>`;
+        switch (msg[i].type) {
+            case "open":
+                listMsgs.innerHTML += `<li class="received"><i>${msg[i].username} has connected.</i></li>`;
+                break
+            case "close":
+                listMsgs.innerHTML += `<li class="received"><i>${msg[i].username} has disconnected.</i></li>`;
+                break
+            default:
+                listMsgs.innerHTML += `<li class="received">${msg[i].username}: ${msg[i].message}</li>`;
+        }
     }
 };
 
