@@ -2,19 +2,25 @@
 
 <div class="navbar">
     <div class="navbarleft">
-        <a href="https://hayat.notathoughtexperiment.me">
+        <a class="menulinks" href="#">
             <img src="static/temp_logo.png" alt="Hayat temp logo.">
         </a>
     </div>
     <div class="navbarright">
-        <a href="https://hayat.notathoughtexperiment.me/anteroom">anteroom</a>
-        <a href="https://hayat.notathoughtexperiment.me/login">login</a>
-        <a href="https://hayat.notathoughtexperiment.me/logout">logout</a>
-        <a href="https://hayat.notathoughtexperiment.me/deleteaccount">delete account</a>
-        <a href="https://hayat.notathoughtexperiment.me/update">update account</a>
-        <a href="https://hayat.notathoughtexperiment.me/forgotpw">forgot password</a>
-        <a href="https://hayat.notathoughtexperiment.me/changepw">change password</a>
-        <a href="https://hayat.notathoughtexperiment.me/register/org">register organisation</a>
+        {{/* <a class="menulinks" href="#/anteroom">anteroom</a>
+        <a class="menulinks" href="#/changepw">change password</a> */}}
+        {{if .IsAdmin}}
+            <a class="menulinks" href="#/logout">logout</a>
+            <a class="menulinks" href="#/deleteaccount">delete account</a>
+            <a class="menulinks" href="#/update">update account</a>
+        {{else}}
+            <a class="menulinks" href="#/login">login</a>
+            <a class="menulinks" href="#/forgotpw">forgot password</a>
+            <a class="menulinks" href="#/register/org">register organisation</a>
+        {{end}}
     </div>
 </div>
+
+<script src="../static/navbar.js"></script>
+
 {{end}}

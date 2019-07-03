@@ -20,6 +20,13 @@ func check(err error) {
 	}
 }
 
+type loggedInDetails struct {
+	Username string `json:"username"`
+	IsAdmin bool `json:"isadmin"`
+	Role string `json:"role"`
+	Organisation string `json:"organisation"`
+}
+
 type notBeingServed struct {
 	Roomid       string `json:"roomid"`
 	Beingserved  *bool   `json:"beingserved"`
@@ -89,11 +96,18 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, &organisationCookie)
 
+	loggedInPayload := loggedInDetails {
+		IsAdmin: true,
+		Username: username,
+		Organisation: organisation,
+	}
+
 	if r.Method != http.MethodPost {
 		t, err := template.ParseFiles("views/base.gohtml", "views/navbar.gohtml", "views/dashboard.gohtml")
 		check(err)
+		// t, err := template.Parse(loggedIn)
 
-		t.ExecuteTemplate(w, "base", nil)
+		t.ExecuteTemplate(w, "base", loggedInPayload)
 		return
 	}
 

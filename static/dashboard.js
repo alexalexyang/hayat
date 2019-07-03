@@ -1,6 +1,4 @@
-let httpProtocol
 let wsProtocol
-let host
 
 if (window.location.hostname == "localhost") {
     wsProtocol = config["ws"]

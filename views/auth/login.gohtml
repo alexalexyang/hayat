@@ -20,21 +20,17 @@
   </p>
 </form>
 
-<script src="https://hayat.notathoughtexperiment.me/static/config.js"></script>
-
 <script>
-var page = "/login"
-var protocol
-var host
+let page = "/login"
 
 if (window.location.hostname == "localhost") {
-    protocol = config["http"]
+    httpProtocol = config["http"]
     host = config["localhost"]
-    document.loginForm.action = `${protocol}${host}${page}`
+    document.loginForm.action = `${httpProtocol}${host}${page}`
 } else {
-    protocol = config["https"]
+    httpProtocol = config["https"]
     host = config["host"]
-    document.loginForm.action = `${protocol}${host}${page}`
+    document.loginForm.action = `${httpProtocol}${host}${page}`
 }
 </script>
 

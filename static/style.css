@@ -4,7 +4,7 @@ html {
 }
 
 .basecomponent {
-    padding-bottom: 15px;
+    padding-bottom: 3px;
 }
 
 /* NAVBAR */
@@ -12,16 +12,22 @@ html {
 .navbar {
   display: flex;
   flex-direction: row;
+  display: table;
 }
 
 .navbarleft {
   /* border: 1px solid red; */
   padding: 0px 10px;
+  display: table-cell;
+  vertical-align: middle;
 }
 
 .navbarright {
   /* border: 1px solid green; */
+  display: table-cell;
+  width: 100%;
   text-align: right;
+  vertical-align: middle;
 }
 
 
