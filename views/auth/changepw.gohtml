@@ -4,7 +4,7 @@
     Change Password
 </h1>
 
-<form id="changepw" name="changepw" action="#" method="post">
+<form class="form" id="changepw" name="changepw" action="#" method="post">
   <p>
     <label>New password</label><br>
     <input type="password" name="password">
@@ -14,22 +14,8 @@
   </p>
 </form>
 
-<script src="https://hayat.notathoughtexperiment.me/static/config.js"></script>
-
 <script>
-var page = "/changepw"
-var protocol
-var host
-
-if (window.location.hostname == "localhost") {
-    protocol = config["http"]
-    host = config["localhost"]
-    document.changepw.action = `${protocol}${host}${page}`
-} else {
-    protocol = config["https"]
-    host = config["host"]
-    document.changepw.action = `${protocol}${host}${page}`
-}
+setPostPath("/changepw")
 </script>
 
 {{end}}

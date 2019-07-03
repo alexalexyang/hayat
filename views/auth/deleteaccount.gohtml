@@ -4,7 +4,7 @@
   Delete account
 </h1>
 
-<form id="deleteAccountForm" name="deleteAccountForm" action="#" method="post">
+<form class="form" id="deleteAccountForm" name="deleteAccountForm" action="#" method="post">
   <p>
     <label>email</label><br>
     <input type="email" name="email">
@@ -18,26 +18,7 @@
 </form>
 
 <script>
-var page = "/deleteaccount"
-
-var request = new XMLHttpRequest();
-request.open('GET', '../static/config.json');
-request.responseType = 'json';
-request.send();
-
-if (window.location.hostname == "localhost") {
-    request.onload = function() {
-        protocol = request.response[0].http
-        host = request.response[0].localhost
-        document.deleteAccountForm.action = `${protocol}${host}${page}`
-    }
-} else {
-    request.onload = function() {
-        protocol = request.response[0].http
-        host = request.response[0].host
-        document.deleteAccountForm.action = `${protocol}${host}${page}`
-    }
-}
+setPostPath("/deleteaccount")
 </script>
 
 {{end}}

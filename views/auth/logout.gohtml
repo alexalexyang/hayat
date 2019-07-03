@@ -4,32 +4,13 @@
     Logout
 </h1>
 
-<form id="logoutForm" name="logoutForm" action="http://localhost:8000/logout" method="post">
+<form class="form" id="logoutForm" name="logoutForm" action="http://localhost:8000/logout" method="post">
     <button type="submit" name="logout" value="logout">logout</button>
   </p>
 </form>
 
 <script>
-var page = "/logout"
-
-var request = new XMLHttpRequest();
-request.open('GET', '../static/config.json');
-request.responseType = 'json';
-request.send();
-
-if (window.location.hostname == "localhost") {
-    request.onload = function() {
-        protocol = request.response[0].http
-        host = request.response[0].localhost
-        document.logoutForm.action = `${protocol}${host}${page}`
-    }
-} else {
-    request.onload = function() {
-        protocol = request.response[0].http
-        host = request.response[0].host
-        document.logoutForm.action = `${protocol}${host}${page}`
-    }
-}
+setPostPath("/logout")
 </script>
 
 {{end}}

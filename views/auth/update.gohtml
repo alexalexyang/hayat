@@ -4,7 +4,7 @@
     Update
 </h1>
 
-<form id="updateForm" name="updateForm" action="#" method="post">
+<form class="form" id="updateForm" name="updateForm" action="#" method="post">
   <p>
     <label>Username</label><br>
     <input type="text" name="username" placeholder="{{.username}}">
@@ -24,26 +24,7 @@
 </form>
 
 <script>
-var page = "/update"
-
-var request = new XMLHttpRequest();
-request.open('GET', '../static/config.json');
-request.responseType = 'json';
-request.send();
-
-if (window.location.hostname == "localhost") {
-    request.onload = function() {
-        protocol = request.response[0].http
-        host = request.response[0].localhost
-        document.updateForm.action = `${protocol}${host}${page}`
-    }
-} else {
-    request.onload = function() {
-        protocol = request.response[0].http
-        host = request.response[0].host
-        document.updateForm.action = `${protocol}${host}${page}`
-    }
-}
+setPostPath("/update")
 </script>
 
 {{end}}

@@ -1,4 +1,7 @@
-{{define "yield" }}
+{{define "anteroom" }}
+<head>
+  <link rel="stylesheet" href="static/style.css" />
+</head>
 
 <h1>
     Issues
@@ -28,16 +31,13 @@
   </p>
 </form>
 
+<script src="../static/config.js"></script>
 <script>
 let page = "/anteroom"
 
 if (window.location.hostname == "localhost") {
-    httpProtocol = config["http"]
-    host = config["localhost"]
     document.anteroomForm.action = `${httpProtocol}${host}${page}`
 } else {
-    httpProtocol = config["https"]
-    host = config["host"]
     document.anteroomForm.action = `${httpProtocol}${host}${page}`
 }
 </script>

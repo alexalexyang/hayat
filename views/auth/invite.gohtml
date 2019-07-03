@@ -4,7 +4,7 @@
     You're invited
 </h1>
 
-<form id="invite" name="invite" action="#" method="post">
+<form class="form" id="invite" name="invite" action="#" method="post">
   <p>
     <label>Email</label><br>
     <input type="email " name="email">
@@ -21,26 +21,7 @@
 </form>
 
 <script>
-var page = "/invite"
-
-var request = new XMLHttpRequest();
-request.open('GET', '../static/config.json');
-request.responseType = 'json';
-request.send();
-
-if (window.location.hostname == "localhost") {
-    request.onload = function() {
-        protocol = request.response[0].http
-        host = request.response[0].localhost
-        document.invite.action = `${protocol}${host}${page}`
-    }
-} else {
-    request.onload = function() {
-        protocol = request.response[0].http
-        host = request.response[0].host
-        document.invite.action = `${protocol}${host}${page}`
-    }
-}
+setPostPath("/invite")
 </script>
 
 {{end}}

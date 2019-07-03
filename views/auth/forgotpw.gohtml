@@ -4,7 +4,7 @@
     Forgot Password
 </h1>
 
-<form id="forgotpw" name="forgotpw" action="#" method="post">
+<form class="form" id="forgotpw" name="forgotpw" action="#" method="post">
   <p>
     <label>email</label><br>
     <input type="email" name="email">
@@ -14,21 +14,7 @@
   </p>
 </form>
 
-<script src="https://hayat.notathoughtexperiment.me/static/config.js"></script>
-
 <script>
-var page = "/forgotpw"
-var protocol
-var host
-
-if (window.location.hostname == "localhost") {
-    protocol = config["http"]
-    host = config["localhost"]
-    document.forgotpw.action = `${protocol}${host}${page}`
-} else {
-    protocol = config["https"]
-    host = config["host"]
-    document.forgotpw.action = `${protocol}${host}${page}`
-}
+setPostPath("/forgotpw")
 </script>
 {{end}}

@@ -92,7 +92,7 @@ func AnteroomHandler(w http.ResponseWriter, r *http.Request) {
 	check(err)
 
 	if r.Method != http.MethodPost {
-		t.ExecuteTemplate(w, "base", nil)
+		t.ExecuteTemplate(w, "anteroom", nil)
 		return
 	}
 

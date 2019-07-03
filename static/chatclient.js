@@ -1,15 +1,3 @@
-let protocol
-let host
-
-if (window.location.hostname == "localhost") {
-    protocol = config["ws"]
-    host = config["localhost"]
-} else {
-    protocol = config["wss"]
-    host = config["host"]
-}
-
-
 let pathname = document.location.pathname.split("/")[2];
 let form = document.getElementById('form-msg');
 let txtMsg = document.getElementById('msg');
@@ -17,8 +5,8 @@ let listMsgs = document.getElementById('msgs');
 let socketStatus = document.getElementById('status');
 let btnClose = document.getElementById('close');
 
-console.log(`${protocol}${host}/chatclientws/${pathname}`)
-let socket = new WebSocket(`${protocol}${host}/chatclientws/${pathname}`);
+// console.log(`${wsProtocol}${host}/chatclientws/${pathname}`)
+let socket = new WebSocket(`${wsProtocol}${host}/chatclientws/${pathname}`);
 socket.onopen = function (event) {
     // socketStatus.innerHTML = 'Connected to: ' + event.currentTarget.url;
     socketStatus.innerHTML = ''

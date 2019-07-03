@@ -4,7 +4,7 @@
     Login
 </h1>
 
-<form id="loginForm" name="loginForm" action="#" method="post">
+<form class="form" id="loginForm" name="loginForm" action="#" method="post">
   <p>
     <label>Email</label><br>
     <input type="email" name="email">
@@ -21,17 +21,7 @@
 </form>
 
 <script>
-let page = "/login"
-
-if (window.location.hostname == "localhost") {
-    httpProtocol = config["http"]
-    host = config["localhost"]
-    document.loginForm.action = `${httpProtocol}${host}${page}`
-} else {
-    httpProtocol = config["https"]
-    host = config["host"]
-    document.loginForm.action = `${httpProtocol}${host}${page}`
-}
+setPostPath("/login")
 </script>
 
 {{end}}

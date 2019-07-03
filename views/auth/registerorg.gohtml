@@ -4,7 +4,7 @@
     Register
 </h1>
 
-<form id="registerForm" name="registerForm" action="#" method="post">
+<form class="form" id="registerForm" name="registerForm" action="#" method="post">
   <p>
     <label>Username</label><br>
     <input type="text" name="username">
@@ -28,26 +28,7 @@
 </form>
 
 <script>
-var page = "/register/org"
-
-var request = new XMLHttpRequest();
-request.open('GET', '../static/config.json');
-request.responseType = 'json';
-request.send();
-
-if (window.location.hostname == "localhost") {
-    request.onload = function() {
-        protocol = request.response[0].http
-        host = request.response[0].localhost
-        document.registerForm.action = `${protocol}${host}${page}`
-    }
-} else {
-    request.onload = function() {
-        protocol = request.response[0].http
-        host = request.response[0].host
-        document.registerForm.action = `${protocol}${host}${page}`
-    }
-}
+setPostPath("/register/org")
 </script>
 
 {{end}}

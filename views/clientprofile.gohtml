@@ -1,4 +1,9 @@
 {{define "clientprofile"}}
+
+	<head>
+		<link rel="stylesheet" href="../static/style.css">
+	</head>
+
 	<h1>
 		Client profile
 	</h1>
@@ -20,21 +25,13 @@
 <script src="../static/config.js"></script>
 
 <script>
-var page = "/chatclient/{{.Roomid}}"
-
-var protocol
-var host
+let page = "/chatclient/{{.Roomid}}"
 
 if (window.location.hostname == "localhost") {
-    protocol = config["http"]
-    host = config["localhost"]
-	document.getElementById("chatnow").href = `${protocol}${host}${page}`
+	document.getElementById("chatnow").href = `${httpProtocol}${host}${page}`
 } else {
-    protocol = config["https"]
-    host = config["host"]
-	document.getElementById("chatnow").href = `${protocol}${host}${page}`
+	document.getElementById("chatnow").href = `${httpProtocol}${host}${page}`
 }
-console.log(document.getElementById("chatnow").href)
 </script>
 
 {{end}}

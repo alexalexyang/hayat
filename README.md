@@ -96,7 +96,6 @@ Managers get to delete the entire organisation, including all staff. So, be care
 - Write errors to log.
 
 ## UX
-- Show only links necessary to each user, eg: don't show login to consultant already logged in.
 - Have /dashboard listen on database table messages so that we can change tab name CSS on new messages.
 - Show only the first 200 lines, and then load all lines if user requests for it?
 
