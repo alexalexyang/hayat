@@ -7,9 +7,9 @@ import (
 
 var (
 	// Domain config
-	Domain   = "localhost"
+	Domain   = "hayat.notathoughtexperiment.me"
 	Port     = ":8000"
-	Protocol = "http://"
+	Protocol = "https://"
 
 	// Db config
 	DBType     = "postgres"

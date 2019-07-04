@@ -22,7 +22,7 @@ func check(err error) {
 
 type loggedInDetails struct {
 	Username string `json:"username"`
-	IsAdmin bool `json:"isadmin"`
+	LoggedIn bool `json:"isadmin"`
 	Role string `json:"role"`
 	Organisation string `json:"organisation"`
 }
@@ -47,6 +47,7 @@ var upgrader = websocket.Upgrader{
 func DashboardHandler(w http.ResponseWriter, r *http.Request) {
 	var username string
 	var organisation string
+	var role string
 
 	sessionCookie, err := r.Cookie("SessionCookie")
 	if err != nil {
@@ -70,9 +71,9 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request) {
 		check(err)
 	}
 
-	statement = `SELECT username, organisation FROM users WHERE email=$1;`
+	statement = `SELECT username, organisation, role FROM users WHERE email=$1;`
 	row = db.QueryRow(statement, email)
-	row.Scan(&username, &organisation)
+	row.Scan(&username, &organisation, &role)
 
 	consultantName := http.Cookie{
 		Name:  "consultantName",
@@ -97,9 +98,10 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &organisationCookie)
 
 	loggedInPayload := loggedInDetails {
-		IsAdmin: true,
+		LoggedIn: true,
 		Username: username,
 		Organisation: organisation,
+		Role: role,
 	}
 
 	if r.Method != http.MethodPost {

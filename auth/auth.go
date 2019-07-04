@@ -45,7 +45,7 @@ func DeleteAccountHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Redirect to dashboard.
-	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/login", http.StatusSeeOther)
+	http.Redirect(w, r, config.Protocol+config.Domain+"/login", http.StatusSeeOther)
 }
 
 func ChangePwHandler(w http.ResponseWriter, r *http.Request) {
@@ -58,7 +58,7 @@ func ChangePwHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Redirect to dashboard.
-	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/login", http.StatusSeeOther)
+	http.Redirect(w, r, config.Protocol+config.Domain+"/login", http.StatusSeeOther)
 }
 
 func ForgotPwHandler(w http.ResponseWriter, r *http.Request) {
@@ -71,7 +71,7 @@ func ForgotPwHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Redirect to dashboard.
-	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/login", http.StatusSeeOther)
+	http.Redirect(w, r, config.Protocol+config.Domain+"/login", http.StatusSeeOther)
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
@@ -84,7 +84,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Redirect to dashboard.
-	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/login", http.StatusSeeOther)
+	http.Redirect(w, r, config.Protocol+config.Domain+"/login", http.StatusSeeOther)
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -98,7 +98,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Redirect to dashboard.
-	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/dashboard", http.StatusSeeOther)
+	http.Redirect(w, r, config.Protocol+config.Domain+"/dashboard", http.StatusSeeOther)
 }
 
 func RegisterOrgHandler(w http.ResponseWriter, r *http.Request) {
@@ -111,7 +111,7 @@ func RegisterOrgHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Redirect to dashboard.
-	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/login", http.StatusSeeOther)
+	http.Redirect(w, r, config.Protocol+config.Domain+"/login", http.StatusSeeOther)
 }
 
 func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -124,7 +124,7 @@ func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Redirect to dashboard.
-	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/login", http.StatusSeeOther)
+	http.Redirect(w, r, config.Protocol+config.Domain+"/login", http.StatusSeeOther)
 }
 
 func InviteHandler(w http.ResponseWriter, r *http.Request) {
@@ -137,7 +137,7 @@ func InviteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Redirect to dashboard.
-	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/dashboard", http.StatusSeeOther)
+	http.Redirect(w, r, config.Protocol+config.Domain+"/dashboard", http.StatusSeeOther)
 }
 
 func UpdateHandler(w http.ResponseWriter, r *http.Request) {
@@ -155,5 +155,5 @@ func UpdateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Redirect to dashboard.
-	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/dashboard", http.StatusSeeOther)
+	http.Redirect(w, r, config.Protocol+config.Domain+"/dashboard", http.StatusSeeOther)
 }

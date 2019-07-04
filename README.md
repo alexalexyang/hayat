@@ -28,7 +28,7 @@ A consultant must first register as an organisation at /register/org. The first 
 
 The manager can then invite other consultants to join at /invite. Here, the manager can choose to make other consultants managers or staff. Managers get to delete the whole organisation, other managers, and staff.
 
-**SEB, FOR THE PURPOSES OF TESTING, PLEASE USE secret_key_here AS YOUR ORGANISATION**
+**SEB, FOR THE PURPOSES OF TESTING, PLEASE USE empathyorg AS YOUR ORGANISATION**
 **Or just /login with email: alexalexyang@gmail.com and password: 1234**
 
 ### Clientlist page
@@ -90,10 +90,11 @@ Managers get to delete the entire organisation, including all staff. So, be care
 # Todos
 
 ## Priority
+- Navbar only works properly on /dashboard. Needs to show correct items on all pages.
 - extend lifetime of all cookies, esp. consultant ones.
-- Prettify navbar.
 - Add separate div so consultant can continue to refer to client's profile.
 - Write errors to log.
+- Delete all cookies on logout.
 
 ## UX
 - Have /dashboard listen on database table messages so that we can change tab name CSS on new messages.
@@ -103,9 +104,9 @@ Managers get to delete the entire organisation, including all staff. So, be care
 
 - Add timestamp to ExplicitAuth sessions table.
   - Delete consultant session after X hours of inactivity.
-
-## Persistence
-- Prioritise database over in-memory storage for persistence.
+- Timestamp to invite table as well.
+  - Delete invite if not used within a week.
+- Delete all rooms, messages, sessions if not used within an hour.
 
 ## Security
 - Consider session cookies rather than cookies, esp. using the Gorilla package.
@@ -113,6 +114,7 @@ Managers get to delete the entire organisation, including all staff. So, be care
 - Double-check placeholders. `?` vs. `$1`.
 - Consider JWT rather than bcrypt.
 - Enforce client-side password best practices.
+- Need separate port for domain name as opposed to localhost port?
 
 ## Misc.
 - Allow users who don't have websites to use my subdomain.

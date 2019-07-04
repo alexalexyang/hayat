@@ -1,5 +1,4 @@
 {{define "navbar"}}
-
 <div class="navbar">
     <div class="navbarleft">
         <a class="menulinks" href="#">
@@ -7,17 +6,20 @@
         </a>
     </div>
     <div class="navbarright">
-        {{/* <a class="menulinks" href="#/anteroom">anteroom</a>
-        <a class="menulinks" href="#/changepw">change password</a> */}}
-        {{if .IsAdmin}}
+        {{if .LoggedIn}}
+            <a class="menulinks" href="#/dashboard">dashboard</a>
             <a class="menulinks" href="#/logout">logout</a>
             <a class="menulinks" href="#/deleteaccount">delete account</a>
             <a class="menulinks" href="#/update">update account</a>
+                {{if eq .Role "manager"}}
+                    <a class="menulinks" href="#/invite">invite</a>
+                {{end}}
         {{else}}
             <a class="menulinks" href="#/login">login</a>
             <a class="menulinks" href="#/forgotpw">forgot password</a>
             <a class="menulinks" href="#/register/org">register organisation</a>
         {{end}}
+
     </div>
 </div>
 

@@ -120,7 +120,7 @@ func AnteroomHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = db.Exec(statement, roomID, token, username, age, gender, issues, false)
 	check(err)
 
-	http.Redirect(w, r, config.Protocol+config.Domain+config.Port+"/chatclient/"+roomID, http.StatusSeeOther)
+	http.Redirect(w, r, config.Protocol+config.Domain+"/chatclient/"+roomID, http.StatusSeeOther)
 }
 
 func ChatClientHandler(w http.ResponseWriter, r *http.Request) {
