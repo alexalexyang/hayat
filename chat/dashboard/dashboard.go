@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 	"github.com/alexalexyang/hayat/chat"
+	"github.com/alexalexyang/hayat/generic"
 	"github.com/alexalexyang/hayat/config"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -18,13 +19,6 @@ func check(err error) {
 	if err != nil {
 		fmt.Println(err)
 	}
-}
-
-type loggedInDetails struct {
-	Username string `json:"username"`
-	LoggedIn bool `json:"isadmin"`
-	Role string `json:"role"`
-	Organisation string `json:"organisation"`
 }
 
 type notBeingServed struct {
@@ -75,39 +69,15 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request) {
 	row = db.QueryRow(statement, email)
 	row.Scan(&username, &organisation, &role)
 
-	consultantName := http.Cookie{
-		Name:  "consultantName",
-		Value: username,
-		// Expires:  time.Now().Add(time.Hour),
-		HttpOnly: true,
-		Secure:   true,
-		// MaxAge:   50000,
-		Path: "/",
-	}
-	http.SetCookie(w, &consultantName)
+	generic.SetCookieHayat(w, "consultantName", username, "/")
+	generic.SetCookieHayat(w, "organisation", organisation, "/")
+	generic.SetCookieHayat(w, "role", role, "/")
 
-	organisationCookie := http.Cookie{
-		Name:  "organisation",
-		Value: organisation,
-		// Expires:  time.Now().Add(time.Hour),
-		HttpOnly: true,
-		Secure:   true,
-		// MaxAge:   50000,
-		Path: "/",
-	}
-	http.SetCookie(w, &organisationCookie)
-
-	loggedInPayload := loggedInDetails {
-		LoggedIn: true,
-		Username: username,
-		Organisation: organisation,
-		Role: role,
-	}
+	loggedInPayload := generic.MakeLoggedInPayload(r)
 
 	if r.Method != http.MethodPost {
 		t, err := template.ParseFiles("views/base.gohtml", "views/navbar.gohtml", "views/dashboard.gohtml")
 		check(err)
-		// t, err := template.Parse(loggedIn)
 
 		t.ExecuteTemplate(w, "base", loggedInPayload)
 		return
@@ -138,12 +108,7 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request) {
 func DashboardWSHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Make a map of all globally available cookies.
-
-	cookies := r.Cookies()
-	cookieMap := make(map[string]string)
-	for _, cookie := range cookies {
-		cookieMap[cookie.Name] = cookie.Value
-	}
+	cookieMap := generic.GetAllCookies(r)
 
 	// Check if user is logged in.
 	if _, ok := cookieMap["SessionCookie"]; ok {

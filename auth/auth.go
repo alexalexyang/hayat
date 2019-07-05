@@ -6,6 +6,7 @@ import (
 	"text/template"
 
 	"github.com/alexalexyang/hayat/config"
+	"github.com/alexalexyang/hayat/generic"
 
 	"github.com/alexalexyang/explicitauth/auth"
 )
@@ -27,69 +28,69 @@ var Cfg = auth.Config{
 	SessionCookieName: "SessionCookie",
 }
 
-func displayTemplate(w http.ResponseWriter, r *http.Request, baseTemplate string, navbarTemplate string, pageTemplate string) {
+func displayTemplate(w http.ResponseWriter, r *http.Request, data generic.LoggedInDetails, baseTemplate string, navbarTemplate string, pageTemplate string) {
 	t, err := template.ParseFiles(baseTemplate, navbarTemplate, pageTemplate)
 	if err != nil {
 		log.Fatal(err)
 	}
-	t.ExecuteTemplate(w, "base", nil)
+	t.ExecuteTemplate(w, "base", data)
 }
 
 func DeleteAccountHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		displayTemplate(w, r, "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/deleteaccount.gohtml")
+		displayTemplate(w, r, generic.MakeLoggedInPayload(r), "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/deleteaccount.gohtml")
 		return
 	}
 	if Cfg.DeleteAccount(w, r) == false {
 		w.WriteHeader(http.StatusResetContent)
 		return
 	}
-	// Redirect to dashboard.
+	
 	http.Redirect(w, r, config.Protocol+config.Domain+"/login", http.StatusSeeOther)
 }
 
 func ChangePwHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		displayTemplate(w, r, "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/changepw.gohtml")
+		displayTemplate(w, r, generic.MakeLoggedInPayload(r), "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/changepw.gohtml")
 		return
 	}
 	if Cfg.ChangePw(w, r) == false {
 		w.WriteHeader(http.StatusResetContent)
 		return
 	}
-	// Redirect to dashboard.
+	
 	http.Redirect(w, r, config.Protocol+config.Domain+"/login", http.StatusSeeOther)
 }
 
 func ForgotPwHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		displayTemplate(w, r, "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/forgotpw.gohtml")
+		displayTemplate(w, r, generic.MakeLoggedInPayload(r), "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/forgotpw.gohtml")
 		return
 	}
 	if Cfg.ForgotPw(w, r) == false {
 		w.WriteHeader(http.StatusResetContent)
 		return
 	}
-	// Redirect to dashboard.
+	
 	http.Redirect(w, r, config.Protocol+config.Domain+"/login", http.StatusSeeOther)
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		displayTemplate(w, r, "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/logout.gohtml")
+		displayTemplate(w, r, generic.MakeLoggedInPayload(r), "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/logout.gohtml")
 		return
 	}
 	if Cfg.Logout(w, r) == false {
 		w.WriteHeader(http.StatusResetContent)
 		return
 	}
-	// Redirect to dashboard.
+	
 	http.Redirect(w, r, config.Protocol+config.Domain+"/login", http.StatusSeeOther)
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		displayTemplate(w, r, "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/login.gohtml")
+		displayTemplate(w, r, generic.MakeLoggedInPayload(r), "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/login.gohtml")
 		return
 	}
 	if Cfg.Login(w, r) == false {
@@ -97,63 +98,58 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Redirect to dashboard.
+	
 	http.Redirect(w, r, config.Protocol+config.Domain+"/dashboard", http.StatusSeeOther)
 }
 
 func RegisterOrgHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		displayTemplate(w, r, "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/registerorg.gohtml")
+		displayTemplate(w, r, generic.MakeLoggedInPayload(r), "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/registerorg.gohtml")
 		return
 	}
 	if Cfg.Register(r) == false {
 		w.WriteHeader(http.StatusResetContent)
 		return
 	}
-	// Redirect to dashboard.
+	
 	http.Redirect(w, r, config.Protocol+config.Domain+"/login", http.StatusSeeOther)
 }
 
 func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		displayTemplate(w, r, "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/registeruser.gohtml")
+		displayTemplate(w, r, generic.MakeLoggedInPayload(r), "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/registeruser.gohtml")
 		return
 	}
 	if Cfg.Register(r) == false {
 		w.WriteHeader(http.StatusResetContent)
 		return
 	}
-	// Redirect to dashboard.
+	
 	http.Redirect(w, r, config.Protocol+config.Domain+"/login", http.StatusSeeOther)
 }
 
 func InviteHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		displayTemplate(w, r, "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/invite.gohtml")
+		displayTemplate(w, r, generic.MakeLoggedInPayload(r), "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/invite.gohtml")
 		return
 	}
 	if Cfg.Invite(w, r) == false {
 		w.WriteHeader(http.StatusResetContent)
 		return
 	}
-	// Redirect to dashboard.
+	
 	http.Redirect(w, r, config.Protocol+config.Domain+"/dashboard", http.StatusSeeOther)
 }
 
 func UpdateHandler(w http.ResponseWriter, r *http.Request) {
-	userProfile, _ := Cfg.GetUser(r)
 	if r.Method != http.MethodPost {
-		t, err := template.ParseFiles("./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/update.gohtml")
-		if err != nil {
-			log.Fatal(err)
-		}
-		t.ExecuteTemplate(w, "base", userProfile)
+		displayTemplate(w, r, generic.MakeLoggedInPayload(r), "./views/base.gohtml", "./views/navbar.gohtml", "./views/auth/update.gohtml")
 		return
 	}
 	if Cfg.Update(r) == false {
 		w.WriteHeader(http.StatusResetContent)
 		return
 	}
-	// Redirect to dashboard.
+	
 	http.Redirect(w, r, config.Protocol+config.Domain+"/dashboard", http.StatusSeeOther)
 }

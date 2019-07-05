@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/alexalexyang/hayat/config"
+	"github.com/alexalexyang/hayat/generic"
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/websocket"
@@ -73,19 +74,6 @@ func decoder(encodedValue string) string {
 	return cookieValue
 }
 
-func CookieSetter(w http.ResponseWriter, cookieName string, encodedValue string, roomPath string) {
-	cookie := http.Cookie{
-		Name:  cookieName,
-		Value: encodedValue,
-		// Expires:  time.Now().Add(time.Hour),
-		HttpOnly: true,
-		Secure:   true,
-		// MaxAge:   50000,
-		Path: roomPath,
-	}
-	http.SetCookie(w, &cookie)
-}
-
 func AnteroomHandler(w http.ResponseWriter, r *http.Request) {
 
 	t, err := template.ParseFiles("./views/base.gohtml", "./views/navbar.gohtml", "./views/anteroom.gohtml")
@@ -105,10 +93,10 @@ func AnteroomHandler(w http.ResponseWriter, r *http.Request) {
 	token := r.FormValue("token")
 
 	roomID := uuid.Must(uuid.NewV4()).String()
-	CookieSetter(w, "clientroom", roomID, "/chatclientws/"+roomID)
+	generic.SetCookieHayat(w, "clientroom", roomID, "/chatclientws/"+roomID)
 
 	// Set client username as cookie so we can use it set up the chatBroker in the chatroom.
-	CookieSetter(w, "clientusername", username, "/chatclientws/"+roomID)
+	generic.SetCookieHayat(w, "clientusername", username, "/chatclientws/"+roomID)
 
 	// Add anteroomValues to db.
 	db, err := sql.Open(config.DBType, config.DBconfig)
@@ -152,11 +140,7 @@ func (rg *Registry) ChatClientWSHandler(w http.ResponseWriter, r *http.Request) 
 	roomid := params["id"]
 
 	// Get all cookies for the room
-	cookies := r.Cookies()
-	cookieMap := make(map[string]string)
-	for _, cookie := range cookies {
-		cookieMap[cookie.Name] = cookie.Value
-	}
+	cookieMap := generic.GetAllCookies(r)
 
 	// Upgrade connection so we can send chat history up if it exists.
 	ws, err := upgrader.Upgrade(w, r, nil)
