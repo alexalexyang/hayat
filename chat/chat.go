@@ -44,6 +44,7 @@ type ChatroomStruct struct {
 }
 
 type Message struct {
+	RoomID	string `json:"roomid"`
 	Username string `json:"username"`
 	Message  string `json:"message"`
 	Timestamp time.Time `json:"timestamp"`
@@ -236,6 +237,7 @@ func (rg *Registry) chatBroker(room *ChatroomStruct, ws *websocket.Conn, usernam
 	var msg Message
 	msg.Username = username
 	msg.Type = "open"
+	msg.RoomID = room.ID
 	saveMsg(room.ID, msg)
 	payload := []Message{msg}
 	for client := range room.Clients {

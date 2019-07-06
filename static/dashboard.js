@@ -14,16 +14,14 @@ socket.onerror = function (error) {
 };
 
 submitter = function (roomid, username) {
-    console.log(document.clientlistForm.inputRoom.action)
     document.clientlistForm.inputRoom.value = roomid;
     document.clientlistForm.deleteRoom.value = "";
-    console.log(document.clientlistForm.inputRoom.value)
     document.getElementById('clientlistForm').submit();
     insertChats(roomid, username);
 };
 
 insertChats = function (roomid, username) {
-    chats.insertAdjacentHTML('beforeend', `<iframe id="tabbedchat-${roomid}" class="tabbedchat" style="display:none" src="${httpProtocol}${host}/chatclient/${roomid}"></iframe>`);
+    chats.insertAdjacentHTML('beforeend', `<iframe id="tabbedchat-${roomid}" class="tabbedchat" style="display:none" onmouseover="clearMsgNotice('${roomid}')" src="${httpProtocol}${host}/chatclient/${roomid}"></iframe>`);
     clientprofiles.insertAdjacentHTML('beforeend', `<iframe id="tabbedprofile-${roomid}" class="tabbedchat" style="display:none" src="${httpProtocol}${host}/clientprofile/${roomid}"></iframe>`);
     tabs.innerHTML += `<button class="tablinks" onclick="showTab(event, '${roomid}')" id="tablink-${roomid}">${username} <img class="closechat" src="static/icons8-close-window-50.png" onclick="closeChat('${roomid}')"></button>`;
 }
@@ -58,7 +56,7 @@ closeChat = function (roomid) {
 
 socket.onmessage = function (event) {
     let msg = JSON.parse(event.data);
-    console.log(msg)
+    // console.log(msg)
 
     if (msg == null) {
         return
@@ -71,7 +69,6 @@ socket.onmessage = function (event) {
 
         // Show all clients that consultant is already serving.
         if (consultantName.length > 0) {
-            console.log("Triggering.")
             insertChats(roomid, username);
             document.getElementById(`tablink-${roomid}`).click();
         }
@@ -88,3 +85,11 @@ socket.onmessage = function (event) {
     };
 
 };
+
+function newMessage(roomid) {
+    document.getElementById(`tablink-${roomid}`).style.color = "blue";
+}
+
+function clearMsgNotice(roomid) {
+    document.getElementById(`tablink-${roomid}`).style.color = "black";
+}

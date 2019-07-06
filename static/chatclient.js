@@ -48,6 +48,12 @@ socket.onmessage = function (event) {
                 break
             default:
                 listMsgs.innerHTML += `<li class="received">${msg[i].username}: ${msg[i].message}</li>`;
+                try {
+                    window.parent.newMessage(msg[i].roomid)
+                } catch {
+
+                }
+
         }
     }
 };
