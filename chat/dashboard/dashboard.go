@@ -83,18 +83,27 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	deleteroom := r.FormValue("deleteroom")
-	if deleteroom != "0" {
+	err = r.ParseForm()
+	check(err)
+
+	if len(r.PostForm["deleteroom"][0]) > 0 {
+		deleteroom := r.PostForm["deleteroom"][0]
+
 		statement = `DELETE FROM ROOMS WHERE roomid=$1;`
 		_, err = db.Exec(statement, deleteroom)
 		check(err)
 		statement = `DELETE FROM MESSAGES WHERE roomid=$1;`
 		_, err = db.Exec(statement, deleteroom)
 		check(err)
+
 		return
 	}
 
-	roomid := r.FormValue("roomid")
+	var roomid string
+	if inputroom, ok := r.PostForm["inputroom"]; ok {
+		roomid = inputroom[0]
+	}
+	
 	statement = `UPDATE rooms SET beingserved=$1, servedby=$2 WHERE roomid=$3;`
 	_, err = db.Exec(statement, true, username, roomid)
 	check(err)

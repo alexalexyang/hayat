@@ -3,7 +3,7 @@
 	
 	<form id="clientlistForm" name="clientlistForm" action="#" method="post" target="hiddenFrame">
 		<input id="deleteRoom" type="hidden" name="deleteroom" value="0"></input>
-		<input id="inputRoom" type="hidden" name="roomid" value="0"></input>
+		<input id="inputRoom" type="hidden" name="inputroom" value="0"></input>
 	</form>
 
 	<div id="rooms">
@@ -13,8 +13,11 @@
 	<div class="tabs" id="tabs">
   	</div>
 
-	<div class="chats" id="chats">
+	<div class="tabcontent">
+		<div class="chats" id="chats"></div>
+		<div class="clientprofiles" id="clientprofiles"></div>
 	</div>
+	
 
 	<script src="../static/dashboard.js"></script>
 {{end}}

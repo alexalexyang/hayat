@@ -20,7 +20,9 @@
 	<h2>Issues</h2>
 	<p>{{.Issues}}</p>
 
-	<p><a id="chatnow" href="#">Chat now.</p>
+	<form id="chatnow" action="#">
+		<button type="submit">Chat now.</button>
+	</form>
 
 <script src="../static/config.js"></script>
 
@@ -28,9 +30,9 @@
 let page = "/chatclient/{{.Roomid}}"
 
 if (window.location.hostname == "localhost") {
-	document.getElementById("chatnow").href = `${httpProtocol}${host}${page}`
+	document.getElementById("chatnow").action = `${httpProtocol}${host}${page}`
 } else {
-	document.getElementById("chatnow").href = `${httpProtocol}${host}${page}`
+	document.getElementById("chatnow").action = `${httpProtocol}${host}${page}`
 }
 </script>
 

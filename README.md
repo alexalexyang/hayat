@@ -76,7 +76,6 @@ Managers get to delete the entire organisation, including all staff. So, be care
 
 ## Priority
 - Add separate div so consultant can continue to refer to client's profile.
-- Make "Chat now" link on /clientprofile into a button.
 - Add line to tell client to wait for a consultant when they first enter.
 - Have /dashboard listen on database table messages so that we can change tab name CSS on new messages.
 - Fix postgres notification so it properly garbage collects dead notification instances.

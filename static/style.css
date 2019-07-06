@@ -92,16 +92,28 @@ a:hover {
   }
   
   /* Style the tab content */
+
   .tabcontent {
+    display: flex;
+  }
+
+  .tabbedchat {
     display: none;
     width: 100%;
-    padding: 6px 12px;
+    /* padding: 6px 12px; */
     border: 1px solid #ccc;
     border-top: none;
   }
 
 .chats {
   display: flex;
+  width: 100%;
+  height: 80vh;
+}
+
+.clientprofiles {
+  display: flex;
+  width: 100%;
   height: 80vh;
 }
 
