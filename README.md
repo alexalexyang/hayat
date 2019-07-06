@@ -75,14 +75,13 @@ Managers get to delete the entire organisation, including all staff. So, be care
 # Todos
 
 ## Priority
-- Add separate div so consultant can continue to refer to client's profile.
-- Add line to tell client to wait for a consultant when they first enter.
 - Have /dashboard listen on database table messages so that we can change tab name CSS on new messages.
 - Fix postgres notification so it properly garbage collects dead notification instances.
 - Write errors to log.
 - Enforce client-side password best practices.
 
 ## UX
+- Add line to tell client to wait for a consultant when they first enter.
 - Show only the first 200 lines, and then load all lines if user requests for it?
 
 ## ExplicitAuth
