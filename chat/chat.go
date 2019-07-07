@@ -180,15 +180,20 @@ func (rg *Registry) ChatClientWSHandler(w http.ResponseWriter, r *http.Request) 
 
 		var username string
 
-		if clientUsername, ok := cookieMap["clientusername"]; ok {
-			username = clientUsername
-		}
 		if consultantUsername, ok := cookieMap["consultantName"]; ok {
 			username = consultantUsername
+			rg.chatBroker(room, ws, username)
+			return
 		}
 
-		rg.chatBroker(room, ws, username)
-		return
+		if clientUsername, ok := cookieMap["clientusername"]; ok {
+			username = clientUsername
+			rg.chatBroker(room, ws, username)
+			return
+		}
+
+		// rg.chatBroker(room, ws, username)
+		// return
 	}
 
 	// Make the chatroom.

@@ -75,7 +75,7 @@ Managers get to delete the entire organisation, including all staff. So, be care
 # Todos
 
 ## Priority
-- Have /dashboard listen on database table messages so that we can change tab name CSS on new messages.
+- Fix ExplicitAuth issues below.
 - Fix postgres notification so it properly garbage collects dead notification instances.
 - Write errors to log.
 - Enforce client-side password best practices.
